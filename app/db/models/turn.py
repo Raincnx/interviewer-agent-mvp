@@ -21,5 +21,6 @@ class Turn(Base):
     knowledge_refs_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     resume_refs_json: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     interview = relationship("Interview", back_populates="turns")

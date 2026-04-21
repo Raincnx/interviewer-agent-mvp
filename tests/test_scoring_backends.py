@@ -27,17 +27,24 @@ class StubProvider(BaseLLMProvider):
         return self.json_payload
 
 
+def _sample_payload(score: int) -> dict:
+    return {
+        "overall_score": score,
+        "dimension_scores": {
+            "基础知识": 4,
+            "项目深度": 4,
+            "追问应对": 3,
+            "表达沟通": 4,
+        },
+        "strengths": ["回答清晰"],
+        "weaknesses": ["边界条件还可以更细"],
+        "next_actions": ["继续补充项目复盘"],
+        "hire_recommendation": "建议继续推进",
+    }
+
+
 def test_scoring_service_uses_provider_backend_by_default() -> None:
-    provider = StubProvider(
-        {
-            "overall_score": 80,
-            "dimension_scores": {"基础知识": 4},
-            "strengths": ["回答清晰"],
-            "weaknesses": ["细节不足"],
-            "next_actions": ["补充项目复盘"],
-            "hire_recommendation": "建议进入下一轮",
-        }
-    )
+    provider = StubProvider(_sample_payload(80))
     service = ScoringService(Settings(scoring_backend="provider"), provider=provider)
 
     payload = service.generate_report_payload(
@@ -45,30 +52,16 @@ def test_scoring_service_uses_provider_backend_by_default() -> None:
         meta={
             "target_role": "后端工程师",
             "level": "高级",
-            "round_type": "项目深挖",
         },
     )
 
     assert payload["overall_score"] == 80
     assert provider.last_schema is not None
+    assert "级别：高级" in provider.last_user_prompt
 
 
 def test_scoring_service_falls_back_to_provider_when_pydanticai_is_unavailable(monkeypatch: pytest.MonkeyPatch) -> None:
-    provider = StubProvider(
-        {
-            "overall_score": 79,
-            "dimension_scores": {
-                "基础知识": 4,
-                "项目深度": 4,
-                "追问应对": 3,
-                "表达沟通": 4,
-            },
-            "strengths": ["项目表述完整"],
-            "weaknesses": ["边界场景还可以更细"],
-            "next_actions": ["继续准备一致性案例"],
-            "hire_recommendation": "建议继续推进",
-        }
-    )
+    provider = StubProvider(_sample_payload(79))
     service = ScoringService(Settings(scoring_backend="pydanticai"), provider=provider)
     monkeypatch.setattr(
         service.pydanticai_backend,
@@ -81,7 +74,6 @@ def test_scoring_service_falls_back_to_provider_when_pydanticai_is_unavailable(m
         meta={
             "target_role": "后端工程师",
             "level": "高级",
-            "round_type": "项目深挖",
         },
     )
 
@@ -122,14 +114,7 @@ def test_pydanticai_backend_can_build_openai_model_with_fake_modules(monkeypatch
 
     class FakeResult:
         def __init__(self) -> None:
-            self.output = InterviewScorePayload(
-                overall_score=88,
-                dimension_scores={"基础知识": 4, "项目深度": 4, "追问应对": 4, "表达沟通": 4},
-                strengths=["结构完整"],
-                weaknesses=["案例还可更细"],
-                next_actions=["补充故障排查细节"],
-                hire_recommendation="建议继续推进",
-            )
+            self.output = InterviewScorePayload(**_sample_payload(88))
 
     class FakeAgent:
         def __init__(self, *, model, instructions: str, output_type) -> None:
@@ -172,7 +157,6 @@ def test_pydanticai_backend_can_build_openai_model_with_fake_modules(monkeypatch
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="PydanticAI requires Python 3.10+")
 def test_pydanticai_backend_retries_on_transient_error(monkeypatch: pytest.MonkeyPatch) -> None:
     pydantic_ai_module = types.ModuleType("pydantic_ai")
-
     call_count = {"value": 0}
 
     class FakePromptedOutput:
@@ -181,14 +165,7 @@ def test_pydanticai_backend_retries_on_transient_error(monkeypatch: pytest.Monke
 
     class FakeResult:
         def __init__(self) -> None:
-            self.output = InterviewScorePayload(
-                overall_score=86,
-                dimension_scores={"基础知识": 4, "项目深度": 4, "追问应对": 4, "表达沟通": 4},
-                strengths=["重点清晰"],
-                weaknesses=["还可补充边界条件"],
-                next_actions=["继续完善案例细节"],
-                hire_recommendation="建议继续推进",
-            )
+            self.output = InterviewScorePayload(**_sample_payload(86))
 
     class FakeAgent:
         def __init__(self, *, model, instructions: str, output_type) -> None:
@@ -218,7 +195,7 @@ def test_pydanticai_backend_retries_on_transient_error(monkeypatch: pytest.Monke
         )
     )
 
-    payload = backend.generate_report_payload("评分系统提示词", "请输出结构化报告")
+    payload = backend.generate_report_payload("评分规则", "请输出结构化报告")
 
     assert payload["overall_score"] == 86
     assert call_count["value"] == 3
@@ -258,7 +235,6 @@ def test_scoring_service_can_use_pydanticai_backend_with_mock_provider() -> None
         meta={
             "target_role": "后端工程师",
             "level": "高级",
-            "round_type": "项目深挖",
         },
     )
 

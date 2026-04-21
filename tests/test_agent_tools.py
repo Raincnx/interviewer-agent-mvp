@@ -77,12 +77,11 @@ def test_append_question_turn_tool_delegates_to_repository() -> None:
     assert kwargs["interview_id"] == "interview-1"
     assert kwargs["question_text"] == "请继续说明这个方案的取舍。"
     assert "什么是 Agent？" in kwargs["knowledge_refs_json"]
-    assert "Agent 平台开发" in kwargs["resume_refs_json"]
+    assert "负责 Agent 平台开发" in kwargs["resume_refs_json"]
 
 
-def test_opening_question_tool_embeds_rag_context_when_available() -> None:
+def test_opening_question_tool_returns_fixed_self_intro_prompt() -> None:
     provider = Mock()
-    provider.generate_text.return_value = "测试问题"
 
     question_rag_service = Mock()
     question_rag_service.retrieve.return_value = [
@@ -105,7 +104,7 @@ def test_opening_question_tool_embeds_rag_context_when_available() -> None:
     resume_rag_service.retrieve.return_value = [
         SimpleNamespace(
             snippet_id="resume-1",
-            section_title="项目经历",
+            section_title="项目：多智能体编排平台",
             excerpt="负责多智能体编排平台开发。",
             score=7.0,
         )
@@ -125,19 +124,15 @@ def test_opening_question_tool_embeds_rag_context_when_available() -> None:
 
     knowledge_pack = toolkit.retrieve_question_bank_context.run(query="Agent 记忆")
     resume_pack = toolkit.retrieve_resume_context.run(resume_text="负责多智能体编排平台开发。", query="多智能体")
-    toolkit.generate_opening_question.run(
+    question = toolkit.generate_opening_question.run(
         SimpleNamespace(
             target_role="AI Agent 开发工程师",
             level="中级",
-            round_type="项目深挖",
             resume_text="负责多智能体编排平台开发。",
         ),
         knowledge_context=knowledge_pack.formatted_context,
         resume_context=resume_pack.formatted_context,
     )
 
-    _, kwargs = provider.generate_text.call_args
-    assert "参考题 1" in kwargs["user_prompt"]
-    assert "什么是 Agent？" in kwargs["user_prompt"]
-    assert "简历片段 1" in kwargs["user_prompt"]
-    assert "多智能体编排平台开发" in kwargs["user_prompt"]
+    assert "自我介绍" in question
+    provider.generate_text.assert_not_called()

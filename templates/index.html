@@ -6,7 +6,7 @@
   <title>面试智能体控制台</title>
   <style>
     :root {
-      --bg: #f6efe4;
+      --bg: #f7f0e5;
       --panel: rgba(255, 251, 244, 0.92);
       --line: rgba(92, 64, 39, 0.12);
       --text: #1f1a17;
@@ -71,10 +71,7 @@
       text-transform: uppercase;
     }
 
-    h1, h2, h3 {
-      margin: 0;
-      letter-spacing: -0.02em;
-    }
+    h1, h2, h3 { margin: 0; }
 
     .sidebar h1 {
       margin-top: 16px;
@@ -107,9 +104,7 @@
       background: rgba(255, 255, 255, 0.58);
     }
 
-    .stat {
-      padding: 14px;
-    }
+    .stat { padding: 14px; }
 
     .stat strong {
       display: block;
@@ -142,13 +137,9 @@
       margin-top: 12px;
       max-height: 320px;
       overflow: auto;
-      padding-right: 2px;
     }
 
-    .question-list {
-      max-height: none;
-      padding-right: 0;
-    }
+    .question-list { max-height: none; }
 
     button,
     input,
@@ -207,9 +198,7 @@
     }
 
     .secondary,
-    .tab-btn {
-      padding: 12px 16px;
-    }
+    .tab-btn { padding: 12px 16px; }
 
     .tab-btn {
       min-width: 140px;
@@ -236,8 +225,9 @@
     }
 
     .empty,
-    .notice,
-    .resume-preview {
+    .resume-preview,
+    .resume-profile,
+    .notice {
       padding: 16px;
       border-radius: 16px;
       border: 1px dashed rgba(92, 64, 39, 0.18);
@@ -260,9 +250,7 @@
         radial-gradient(circle at top right, rgba(180, 90, 48, 0.1), transparent 38%);
     }
 
-    .tabs {
-      padding: 18px 28px 0;
-    }
+    .tabs { padding: 18px 28px 0; }
 
     .tab-panel {
       display: none;
@@ -271,9 +259,7 @@
       border-top: 1px solid var(--line);
     }
 
-    .tab-panel.active {
-      display: block;
-    }
+    .tab-panel.active { display: block; }
 
     .form-grid {
       display: grid;
@@ -340,11 +326,53 @@
       font-size: 13px;
     }
 
+    .resume-profile {
+      margin-top: 12px;
+      display: none;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .profile-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(255,255,255,0.62);
+    }
+
+    .profile-card strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--accent-strong);
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .tag,
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(180, 90, 48, 0.12);
+      color: var(--accent-strong);
+      font-size: 13px;
+    }
+
     .chat-shell {
       min-height: 260px;
       max-height: 420px;
       overflow: auto;
-      padding-right: 2px;
     }
 
     .msg {
@@ -418,9 +446,7 @@
       padding: 20px;
     }
 
-    .report-card.visible {
-      display: block;
-    }
+    .report-card.visible { display: block; }
 
     .report-head {
       display: flex;
@@ -489,24 +515,6 @@
       border-bottom: none;
     }
 
-    .pill,
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(180, 90, 48, 0.12);
-      color: var(--accent-strong);
-      font-size: 13px;
-    }
-
-    .tag-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
     .detail-block {
       margin-top: 16px;
       padding-top: 16px;
@@ -534,7 +542,8 @@
       .composer,
       .stats,
       .report-grid,
-      .question-bank-layout {
+      .question-bank-layout,
+      .profile-grid {
         grid-template-columns: 1fr;
       }
 
@@ -550,39 +559,19 @@
     <aside class="panel sidebar">
       <div class="badge">Runtime Config</div>
       <h1>面试智能体控制台</h1>
-      <p>这里可以切换运行时 Provider、模型、Prompt 版本和评分后端。你也可以上传简历，让面试官优先围绕候选人的真实经历发问。</p>
+      <p>这里可以切换运行时 Provider、模型、Prompt 版本和评分后端。上传简历后，面试官会优先围绕项目经历发问，再结合题库补深度。</p>
 
       <div class="stats">
-        <div class="stat">
-          <strong id="providerValue">mock（本地演示）</strong>
-          <span class="meta">当前 Provider</span>
-        </div>
-        <div class="stat">
-          <strong id="modelValue">mock-interviewer-v1</strong>
-          <span class="meta">当前模型</span>
-        </div>
-        <div class="stat">
-          <strong id="promptValue">v1</strong>
-          <span class="meta">Prompt 版本</span>
-        </div>
-        <div class="stat">
-          <strong id="scoringBackendValue">provider</strong>
-          <span class="meta">评分后端</span>
-        </div>
-        <div class="stat">
-          <strong id="turnValue">0</strong>
-          <span class="meta">已回答轮数</span>
-        </div>
-        <div class="stat">
-          <strong id="questionCountValue">0</strong>
-          <span class="meta">题库题目数</span>
-        </div>
+        <div class="stat"><strong id="providerValue">mock（本地演示）</strong><span class="meta">当前 Provider</span></div>
+        <div class="stat"><strong id="modelValue">mock-interviewer-v1</strong><span class="meta">当前模型</span></div>
+        <div class="stat"><strong id="promptValue">v1</strong><span class="meta">Prompt 版本</span></div>
+        <div class="stat"><strong id="scoringBackendValue">provider</strong><span class="meta">评分后端</span></div>
+        <div class="stat"><strong id="turnValue">0</strong><span class="meta">已回答轮数</span></div>
+        <div class="stat"><strong id="questionCountValue">0</strong><span class="meta">题库题目数</span></div>
       </div>
 
       <section class="side-block">
-        <div class="side-head">
-          <h3>运行时模型配置</h3>
-        </div>
+        <div class="side-head"><h3>运行时模型配置</h3></div>
         <p class="section-note">切到真实模型时再填 API Key；保留 `mock` 则整条链路都可以本地演示。</p>
         <div class="field-grid">
           <div>
@@ -624,9 +613,7 @@
           <h3>历史面试</h3>
           <button id="refreshHistoryBtn" class="secondary" type="button">刷新列表</button>
         </div>
-        <div id="historyList" class="history-list">
-          <div class="empty">还没有历史面试记录。</div>
-        </div>
+        <div id="historyList" class="history-list"><div class="empty">还没有历史面试记录。</div></div>
       </section>
 
       <section class="side-block">
@@ -641,7 +628,7 @@
     <main class="panel workspace">
       <section class="workspace-head">
         <h2>当前工作台</h2>
-        <p>左边负责运行时配置和历史记录，右边既可以直接跑一场面试，也可以浏览已采集的中文 Agent 岗题库。上传简历后，Agent 会优先围绕简历项目追问，再用题库知识补深度。</p>
+        <p>左边负责运行时配置和历史记录，右边可以直接跑一场面试，也可以浏览已采集的中文 Agent 岗题库。简历会先被解析成结构化画像，再进入问题生成链路。</p>
       </section>
 
       <section class="tabs">
@@ -671,22 +658,13 @@
               <option>资深</option>
             </select>
           </div>
-          <div>
-            <label for="round_type">轮次</label>
-            <select id="round_type">
-              <option selected>项目深挖</option>
-              <option>系统设计</option>
-              <option>问题排查</option>
-              <option>行为面试</option>
-            </select>
-          </div>
         </div>
 
         <div class="resume-box">
           <div class="toolbar">
             <div>
               <h3>候选人简历</h3>
-              <p class="section-note">支持 PDF、DOCX、TXT、Markdown。解析后会在创建面试时一并带入，让问题更贴近真实经历。</p>
+              <p class="section-note">支持 PDF、DOCX、TXT、Markdown。解析后会提取项目、技能和教育信息，并用于面试个性化追问。</p>
             </div>
           </div>
           <div class="field-grid">
@@ -698,6 +676,7 @@
           </div>
           <div id="resumeMeta" class="resume-meta">当前未附加简历。</div>
           <div id="resumePreview" class="resume-preview" style="display: none;"></div>
+          <div id="resumeProfile" class="resume-profile"></div>
         </div>
 
         <div class="control-row">
@@ -709,8 +688,12 @@
           </div>
         </div>
 
+        <div id="stageNotice" class="notice" style="margin-bottom: 18px;">
+          当前还没有开始面试。默认会按 1 小时节奏推进：自我介绍 -> 项目/实习深挖 -> 八股基础 -> LeetCode 手撕。
+        </div>
+
         <div id="chatShell" class="chat-shell">
-          <div id="emptyState" class="empty">你可以先保存运行时配置，然后开始一场新面试。上传简历后，首轮问题会优先围绕简历中的项目和经历展开。</div>
+          <div id="emptyState" class="empty">你可以先保存运行时配置，然后上传简历并开始一场新面试。</div>
         </div>
 
         <div class="composer">
@@ -736,22 +719,10 @@
             </div>
           </div>
           <div class="report-grid">
-            <div class="report-block">
-              <h3>维度得分</h3>
-              <div id="dimensionScores" class="dimension-list"></div>
-            </div>
-            <div class="report-block">
-              <h3>优势亮点</h3>
-              <ul id="strengths"></ul>
-            </div>
-            <div class="report-block">
-              <h3>待提升点</h3>
-              <ul id="weaknesses"></ul>
-            </div>
-            <div class="report-block">
-              <h3>下一步建议</h3>
-              <ul id="nextActions"></ul>
-            </div>
+            <div class="report-block"><h3>维度得分</h3><div id="dimensionScores" class="dimension-list"></div></div>
+            <div class="report-block"><h3>优势亮点</h3><ul id="strengths"></ul></div>
+            <div class="report-block"><h3>待提升点</h3><ul id="weaknesses"></ul></div>
+            <div class="report-block"><h3>下一步建议</h3><ul id="nextActions"></ul></div>
           </div>
         </section>
       </section>
@@ -803,6 +774,7 @@
     const chat = document.getElementById("chatShell");
     const emptyState = document.getElementById("emptyState");
     const answerBox = document.getElementById("answerBox");
+    const stageNotice = document.getElementById("stageNotice");
     const replyBtn = document.getElementById("replyBtn");
     const finishBtn = document.getElementById("finishBtn");
     const startBtn = document.getElementById("startBtn");
@@ -816,10 +788,10 @@
     const resumeFileInput = document.getElementById("resumeFile");
     const resumeMeta = document.getElementById("resumeMeta");
     const resumePreview = document.getElementById("resumePreview");
+    const resumeProfile = document.getElementById("resumeProfile");
     const parseResumeBtn = document.getElementById("parseResumeBtn");
 
     let activeInterviewId = null;
-    let answeredTurns = 0;
     let interviewDone = false;
     let questionBankItems = [];
     let selectedQuestionId = null;
@@ -986,12 +958,53 @@
       renderList("nextActions", report.next_actions || []);
     }
 
+    function renderResumeProfile(profile) {
+      if (!profile) {
+        resumeProfile.style.display = "none";
+        resumeProfile.innerHTML = "";
+        return;
+      }
+
+      const skills = (profile.skills || []).map((skill) => `<span class="tag">${escapeHtml(skill)}</span>`).join("");
+      const projects = (profile.projects || []).slice(0, 4).map((project) => `
+        <div class="profile-card">
+          <strong>${escapeHtml(project.title)}</strong>
+          <div class="meta">${escapeHtml(project.summary)}</div>
+          <div class="tag-row">${(project.technologies || []).map((tech) => `<span class="tag">${escapeHtml(tech)}</span>`).join("")}</div>
+        </div>
+      `).join("");
+      const educations = (profile.educations || []).slice(0, 2).map((edu) => `
+        <div class="profile-card">
+          <strong>${escapeHtml(edu.school || "教育背景")}</strong>
+          <div class="meta">${escapeHtml(edu.summary || edu.degree || "")}</div>
+        </div>
+      `).join("");
+
+      resumeProfile.style.display = "block";
+      resumeProfile.innerHTML = `
+        <strong>结构化简历画像</strong>
+        ${profile.headline ? `<div class="meta" style="margin-top: 8px;">${escapeHtml(profile.headline)}</div>` : ""}
+        <div class="tag-row" style="margin-top: 12px;">${skills || '<span class="meta">暂未提取到技能标签</span>'}</div>
+        <div class="profile-grid">
+          <div>
+            <div class="meta" style="margin: 12px 0 8px;">重点项目</div>
+            ${projects || '<div class="profile-card"><div class="meta">暂未识别到项目经历。</div></div>'}
+          </div>
+          <div>
+            <div class="meta" style="margin: 12px 0 8px;">教育背景</div>
+            ${educations || '<div class="profile-card"><div class="meta">暂未识别到教育信息。</div></div>'}
+          </div>
+        </div>
+      `;
+    }
+
     function resetResumeState() {
       parsedResume = null;
       resumeMeta.textContent = "当前未附加简历。";
       resumeMeta.classList.remove("error", "success");
       resumePreview.style.display = "none";
       resumePreview.textContent = "";
+      renderResumeProfile(null);
       resumeFileInput.value = "";
     }
 
@@ -1002,22 +1015,25 @@
         resumeMeta.classList.remove("error");
         resumePreview.style.display = detail.resume_preview ? "block" : "none";
         resumePreview.textContent = detail.resume_preview || "";
+        renderResumeProfile(detail.resume_profile || null);
         return;
       }
+
       if (!parsedResume) {
         resetResumeState();
         return;
       }
+
       resumeMeta.textContent = `已解析简历：${parsedResume.filename} · ${parsedResume.char_count} 字`;
       resumeMeta.classList.add("success");
       resumeMeta.classList.remove("error");
       resumePreview.style.display = "block";
       resumePreview.textContent = parsedResume.preview;
+      renderResumeProfile(parsedResume.profile || null);
     }
 
     function resetWorkspace() {
       activeInterviewId = null;
-      answeredTurns = 0;
       interviewDone = false;
       turnValue.textContent = "0";
       chat.innerHTML = "";
@@ -1025,6 +1041,7 @@
       chat.appendChild(emptyState);
       answerBox.value = "";
       clearReport();
+      stageNotice.textContent = "当前还没有开始面试。默认会按 1 小时节奏推进：自我介绍 -> 项目/实习深挖 -> 八股基础 -> LeetCode 手撕。";
       setBusy(false, "准备就绪");
       document.querySelectorAll(".history-item").forEach((item) => item.classList.remove("active"));
       resetResumeState();
@@ -1050,9 +1067,9 @@
 
     function applyInterviewDetail(detail) {
       activeInterviewId = detail.id;
-      answeredTurns = (detail.turns || []).filter((turn) => Boolean(turn.candidate_answer)).length;
       interviewDone = detail.status === "finished";
-      turnValue.textContent = String(answeredTurns);
+      turnValue.textContent = String((detail.turns || []).filter((turn) => Boolean(turn.candidate_answer)).length);
+      stageNotice.textContent = `当前阶段：${detail.current_stage_label} · 预计已用 ${detail.estimated_elapsed_minutes} 分钟 · 预计剩余 ${detail.estimated_remaining_minutes} 分钟`;
       renderChat(buildTranscriptFromDetail(detail));
       renderReport(detail.report);
       renderResumeState(detail);
@@ -1134,9 +1151,7 @@
     async function requestJSON(url, options = {}) {
       const response = await fetch(url, options);
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(data.detail || "请求失败");
-      }
+      if (!response.ok) throw new Error(data.detail || "请求失败");
       return data;
     }
 
@@ -1163,7 +1178,6 @@
         scoringBackendValue.textContent = "未知";
         runtimeNotice.textContent = "后端不可用。";
         runtimeNotice.classList.add("error");
-        setBusy(false, "后端不可用");
       }
     }
 
@@ -1222,7 +1236,7 @@
         card.dataset.id = item.id;
         card.innerHTML = `
           <strong>${escapeHtml(item.target_role)}</strong>
-          <div class="meta">${escapeHtml(item.level)} / ${escapeHtml(item.round_type)}</div>
+          <div class="meta">${escapeHtml(item.level)}</div>
           <div class="meta">
             状态：${escapeHtml(translateStatus(item.status))}<br />
             Provider：${escapeHtml(translateProvider(item.provider))}<br />
@@ -1274,14 +1288,9 @@
       try {
         const formData = new FormData();
         formData.append("file", file);
-        const response = await fetch("/api/resume/parse", {
-          method: "POST",
-          body: formData,
-        });
+        const response = await fetch("/api/resume/parse", { method: "POST", body: formData });
         const data = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          throw new Error(data.detail || "简历解析失败");
-        }
+        if (!response.ok) throw new Error(data.detail || "简历解析失败");
         parsedResume = data;
         renderResumeState();
         setBusy(false, "简历解析完成");
@@ -1291,6 +1300,7 @@
         resumeMeta.textContent = error.message;
         resumeMeta.classList.add("error");
         resumePreview.style.display = "none";
+        renderResumeProfile(null);
         setBusy(false, error.message);
         return null;
       }
@@ -1307,7 +1317,6 @@
         const payload = {
           target_role: document.getElementById("target_role").value,
           level: document.getElementById("level").value,
-          round_type: document.getElementById("round_type").value,
           resume_filename: parsedResume?.filename || null,
           resume_text: parsedResume?.text || null,
         };
@@ -1319,9 +1328,9 @@
         });
 
         activeInterviewId = data.interview_id;
-        answeredTurns = 0;
         interviewDone = false;
         turnValue.textContent = "0";
+        stageNotice.textContent = `当前阶段：${data.current_stage_label} · 预计已用 ${data.estimated_elapsed_minutes} 分钟 · 预计剩余 ${data.estimated_remaining_minutes} 分钟`;
         clearReport();
         answerBox.value = "";
         renderChat([{ role: "assistant", text: data.question, knowledgeRefs: [], resumeRefs: [] }]);
@@ -1371,9 +1380,7 @@
 
     runtimeProvider.addEventListener("change", () => {
       runtimeModel.value = defaultModelFor(runtimeProvider.value);
-      if (runtimeProvider.value === "mock") {
-        runtimeApiKey.value = "";
-      }
+      if (runtimeProvider.value === "mock") runtimeApiKey.value = "";
     });
 
     interviewTabBtn.addEventListener("click", () => switchTab("interview"));

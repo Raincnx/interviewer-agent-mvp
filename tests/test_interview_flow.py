@@ -69,7 +69,6 @@ def test_interview_flow_generates_report_at_max_turns(client: TestClient) -> Non
         json={
             "target_role": "后端工程师",
             "level": "高级",
-            "round_type": "项目深挖",
         },
     )
     assert create_response.status_code == 200
@@ -77,25 +76,69 @@ def test_interview_flow_generates_report_at_max_turns(client: TestClient) -> Non
     payload = create_response.json()
     interview_id = payload["interview_id"]
     assert payload["status"] == "running"
-    assert payload["max_turns"] == 5
+    assert payload["max_turns"] == 8
     assert payload["prompt_version"] == "v1"
     assert payload["question"]
-    assert "Agent" in payload["question"] or "Tools" in payload["question"] or "项目" in payload["question"]
+    assert "自我介绍" in payload["question"]
+    assert payload["current_stage"] == "intro"
+    assert payload["planned_duration_minutes"] == 60
+    assert payload["estimated_remaining_minutes"] == 60
+    assert len(payload["stage_plan"]) == 4
 
-    for index in range(4):
-        reply_response = client.post(
-            f"/api/interviews/{interview_id}/reply",
-            json={"answer": f"My answer #{index + 1}"},
-        )
-        assert reply_response.status_code == 200
-        reply_payload = reply_response.json()
-        assert reply_payload["done"] is False
-        assert reply_payload["question"]
-        assert reply_payload["remaining_turns"] == 4 - index
+    first_reply = client.post(
+        f"/api/interviews/{interview_id}/reply",
+        json={"answer": "我先做一下自我介绍，最近主要在做高并发后端系统。"},
+    )
+    assert first_reply.status_code == 200
+    assert "接下来我们进入项目深挖" in first_reply.json()["question"]
+
+    second_reply = client.post(
+        f"/api/interviews/{interview_id}/reply",
+        json={"answer": "我负责订单系统重构，主要做缓存和异步链路设计。"},
+    )
+    assert second_reply.status_code == 200
+    assert second_reply.json()["done"] is False
+
+    third_reply = client.post(
+        f"/api/interviews/{interview_id}/reply",
+        json={"answer": "我们在一致性和延迟之间做了很多取舍。"},
+    )
+    assert third_reply.status_code == 200
+    assert third_reply.json()["done"] is False
+
+    fourth_reply = client.post(
+        f"/api/interviews/{interview_id}/reply",
+        json={"answer": "最终线上延迟下降了 20%，但压测阶段也暴露过热点问题。"},
+    )
+    assert fourth_reply.status_code == 200
+    assert "项目部分我先了解到这里" in fourth_reply.json()["question"]
+    assert "接下来我切到几道基础题" in fourth_reply.json()["question"]
+
+    fifth_reply = client.post(
+        f"/api/interviews/{interview_id}/reply",
+        json={"answer": "我理解 Function Calling 更适合结构化工具调用。"},
+    )
+    assert fifth_reply.status_code == 200
+    assert fifth_reply.json()["done"] is False
+
+    sixth_reply = client.post(
+        f"/api/interviews/{interview_id}/reply",
+        json={"answer": "MCP 更适合把工具能力做成标准协议暴露给 Agent。"},
+    )
+    assert sixth_reply.status_code == 200
+    assert "基础部分先到这里" in sixth_reply.json()["question"]
+    assert "最后我们留 15 到 20 分钟做一道手撕题" in sixth_reply.json()["question"]
+
+    seventh_reply = client.post(
+        f"/api/interviews/{interview_id}/reply",
+        json={"answer": "LRU Cache 我会用哈希表加双向链表来实现。"},
+    )
+    assert seventh_reply.status_code == 200
+    assert seventh_reply.json()["done"] is False
 
     final_reply = client.post(
         f"/api/interviews/{interview_id}/reply",
-        json={"answer": "这是我的最后一轮回答"},
+        json={"answer": "核心操作可以保持 O(1)，我会先定义节点再维护最近使用顺序。"},
     )
     assert final_reply.status_code == 200
     final_payload = final_reply.json()
@@ -108,36 +151,41 @@ def test_interview_flow_generates_report_at_max_turns(client: TestClient) -> Non
     detail_payload = detail_response.json()
     assert detail_payload["status"] == "finished"
     assert detail_payload["prompt_version"] == "v1"
-    assert len(detail_payload["turns"]) == 5
+    assert len(detail_payload["turns"]) == 8
     assert all(turn["candidate_answer"] for turn in detail_payload["turns"])
     assert detail_payload["turns"][0]["knowledge_refs"]
     assert detail_payload["turns"][0]["knowledge_refs"][0]["title"] == "什么是 Agent？"
     assert detail_payload["report"]["hire_recommendation"] == "建议保留"
+    assert detail_payload["current_stage"] == "coding"
+    assert detail_payload["planned_duration_minutes"] == 60
 
 
-def test_resume_driven_interview_uses_resume_refs(client: TestClient) -> None:
+def test_resume_driven_interview_returns_structured_profile(client: TestClient) -> None:
     create_response = client.post(
         "/api/interviews",
         json={
             "target_role": "AI Agent 开发工程师",
             "level": "中级",
-            "round_type": "项目深挖",
             "resume_filename": "resume.txt",
-            "resume_text": "项目经历\n负责多智能体编排平台开发，落地了工具调用、记忆管理与链路观测。",
+            "resume_text": "项目经历\n多智能体编排平台\n负责多智能体编排平台开发，落地了工具调用、记忆管理与链路观测。\n\n专业技能\nPython、FastAPI、RAG、MCP",
         },
     )
     assert create_response.status_code == 200
     payload = create_response.json()
     assert payload["resume_attached"] is True
-    assert "简历" in payload["question"]
+    assert "自我介绍" in payload["question"]
 
     detail_response = client.get(f"/api/interviews/{payload['interview_id']}")
     assert detail_response.status_code == 200
     detail = detail_response.json()
     assert detail["has_resume"] is True
     assert detail["resume_filename"] == "resume.txt"
+    assert detail["resume_profile"]["projects"]
+    assert detail["resume_profile"]["projects"][0]["title"] == "多智能体编排平台"
+    assert detail["resume_profile"]["skills"]
     assert detail["turns"][0]["resume_refs"]
-    assert "多智能体编排平台开发" in detail["turns"][0]["resume_refs"][0]["excerpt"]
+    assert "多智能体编排平台" in detail["turns"][0]["resume_refs"][0]["section_title"]
+    assert detail["current_stage"] == "intro"
 
 
 def test_resume_parse_endpoint_accepts_txt_file(client: TestClient) -> None:
@@ -146,7 +194,7 @@ def test_resume_parse_endpoint_accepts_txt_file(client: TestClient) -> None:
         files={
             "file": (
                 "resume.txt",
-                "项目经历\n负责 AI Agent 平台开发与线上观测。\n技能栈\nPython、FastAPI、RAG。",
+                "项目经历\nAI Agent 平台\n负责 AI Agent 平台开发与线上观测。\n\n技能栈\nPython、FastAPI、RAG。",
                 "text/plain",
             )
         },
@@ -155,7 +203,9 @@ def test_resume_parse_endpoint_accepts_txt_file(client: TestClient) -> None:
     payload = response.json()
     assert payload["filename"] == "resume.txt"
     assert payload["char_count"] > 20
-    assert "AI Agent 平台开发" in payload["text"]
+    assert "AI Agent 平台" in payload["text"]
+    assert payload["profile"]["projects"]
+    assert payload["profile"]["skills"]
 
 
 def test_report_endpoint_returns_existing_report(client: TestClient) -> None:
@@ -179,7 +229,6 @@ def test_history_endpoint_lists_saved_interviews(client: TestClient) -> None:
         json={
             "target_role": "后端工程师",
             "level": "高级",
-            "round_type": "项目深挖",
             "resume_filename": "resume.txt",
             "resume_text": "项目经历\n负责后端系统重构。",
         },
@@ -189,7 +238,6 @@ def test_history_endpoint_lists_saved_interviews(client: TestClient) -> None:
         json={
             "target_role": "AI Agent 开发工程师",
             "level": "中级",
-            "round_type": "系统设计",
         },
     ).json()
 

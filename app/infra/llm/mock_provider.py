@@ -8,23 +8,24 @@ from app.infra.llm.base import BaseLLMProvider
 
 class MockLLMProvider(BaseLLMProvider):
     def generate_text(self, system_prompt: str, user_prompt: str) -> str:
-        if "现在开始一场新的技术面试" in user_prompt:
-            resume_summary = self._extract_resume_hint(user_prompt)
-            if resume_summary:
-                return f"我看到你在简历里提到了{resume_summary}。请你挑一个最能体现你技术判断的项目，按背景、职责、方案取舍和结果完整展开。"
-            if "参考题 1" in user_prompt:
-                return "我们先从题库里的核心主题开始。请你解释一下 Agent、Workflow 和 Tools 三者的区别，并结合一个真实项目说明它们是如何协同工作的。"
-            return "先请你挑一个最能代表你技术深度的项目，按背景、职责、技术方案和结果完整介绍一下。"
+        stage = self._extract_stage(user_prompt)
+        resume_summary = self._extract_resume_hint(user_prompt)
 
-        if "完整对话" in user_prompt:
-            resume_summary = self._extract_resume_hint(user_prompt)
+        if stage == "项目 / 实习深挖":
             if resume_summary:
-                return f"你刚才提到了{resume_summary}。如果把它真正落到线上系统里，你会怎么做可观测性、容错和回滚设计？"
-            if "参考题 1" in user_prompt:
-                return "你提到了这个方案，那如果要继续往下深挖，Memory、Function Calling 和可观测性这三块你会怎么一起设计？"
-            return "如果把你刚才说的方案真正落地到线上，你会怎么处理稳定性、观测性和回滚？"
+                return (
+                    f"你刚才提到了{resume_summary}。如果把它真正放到线上环境里，"
+                    "你做过哪些核心方案取舍？当时为什么这么选，最后数据结果怎么样？"
+                )
+            return "你刚才讲了这个项目的背景，那你具体负责的核心模块是什么？最难的技术取舍是什么？"
 
-        return "继续说说你会怎么做取舍。"
+        if stage == "八股基础":
+            return "我们切到基础题。你先说说 Function Calling、MCP 和普通 prompt chaining 的区别，以及各自适用场景。"
+
+        if stage == "LeetCode 手撕":
+            return "我们进入手撕题。请你先讲一下如何用哈希表和滑动窗口求解最长无重复子串，再说时间复杂度。"
+
+        return "继续往下讲讲你会怎么做技术取舍，以及你会关注哪些线上指标。"
 
     def generate_json(self, system_prompt: str, user_prompt: str, schema: dict[str, Any]) -> dict[str, Any]:
         return {
@@ -43,7 +44,7 @@ class MockLLMProvider(BaseLLMProvider):
             "weaknesses": [
                 "对关键细节的展开还不够深入。",
                 "工具链与工程化细节描述偏少。",
-                "表达结构可以再更清晰一些。",
+                "表达结构还可以更清晰一些。",
             ],
             "next_actions": [
                 "把一个代表性项目按背景、目标、方案、取舍、结果重新整理成完整故事。",
@@ -54,12 +55,21 @@ class MockLLMProvider(BaseLLMProvider):
         }
 
     @staticmethod
+    def _extract_stage(user_prompt: str) -> str | None:
+        match = re.search(r"当前阶段：([^\n]+)", user_prompt)
+        if match:
+            return match.group(1).strip()
+        return None
+
+    @staticmethod
     def _extract_resume_hint(user_prompt: str) -> str | None:
         if "暂无可用简历参考。" in user_prompt:
             return None
-        matches = re.findall(r"\[简历片段 \d+\][^\n]*\n(.+)", user_prompt)
+
+        matches = re.findall(r"\[简历片段\s*\d+\][^\n]*\n(.+)", user_prompt)
         if not matches:
             return "你的项目经历"
+
         snippet = matches[0].strip().replace("\n", " ")
         snippet = re.sub(r"\s+", " ", snippet)
         return snippet[:24]

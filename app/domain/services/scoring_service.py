@@ -25,8 +25,7 @@ class ScoringService:
         user_prompt = (
             "请基于下面这场面试生成最终结构化评估报告。\n"
             f"岗位：{meta['target_role']}\n"
-            f"级别：{meta['level']}\n"
-            f"轮次：{meta['round_type']}\n\n"
+            f"级别：{meta['level']}\n\n"
             f"完整对话：\n{transcript}"
         )
 

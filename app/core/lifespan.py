@@ -4,7 +4,17 @@ from fastapi import FastAPI
 from sqlalchemy import inspect, text
 
 from app.db.base import Base
-from app.db.models import interview, question_bank_item, report, turn  # noqa: F401
+from app.db.models import (  # noqa: F401
+    interview,
+    question_bank_item,
+    question_collection_job,
+    question_occurrence,
+    question_source,
+    raw_question_document,
+    report,
+    structured_question,
+    turn,
+)
 from app.db.session import engine
 
 
@@ -30,6 +40,8 @@ def ensure_runtime_schema() -> None:
             statements.append("ALTER TABLE turns ADD COLUMN knowledge_refs_json TEXT")
         if "resume_refs_json" not in turn_columns:
             statements.append("ALTER TABLE turns ADD COLUMN resume_refs_json TEXT")
+        if "updated_at" not in turn_columns:
+            statements.append("ALTER TABLE turns ADD COLUMN updated_at DATETIME")
 
     if not statements:
         return

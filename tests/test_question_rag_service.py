@@ -72,14 +72,14 @@ def test_question_rag_service_formats_context() -> None:
     assert "如何设计记忆？" in formatted
 
 
-def test_resume_rag_service_retrieves_relevant_snippets() -> None:
+def test_resume_rag_service_retrieves_relevant_project_snippets() -> None:
     service = ResumeRAGService()
     results = service.retrieve(
-        "项目经历\n负责多智能体编排平台开发，落地了工具调用与记忆管理。\n\n技能栈\nPython FastAPI RAG",
+        "项目经历\n多智能体编排平台\n负责多智能体编排平台开发，落地了工具调用与记忆管理。\n\n技能栈\nPython FastAPI RAG",
         "多智能体 记忆 工具调用",
         top_k=2,
     )
 
     assert results
-    assert "多智能体编排平台开发" in results[0].excerpt
+    assert "多智能体编排平台" in results[0].section_title
     assert results[0].score > 0

@@ -5,6 +5,7 @@ import json
 from sqlalchemy.orm import Session
 
 from app.agent.loop import InterviewerAgent
+from app.agent.state import InterviewAgentState
 from app.agent.tools import InterviewAgentToolkit
 from app.core.config import Settings
 from app.domain.schemas.interview import (
@@ -18,6 +19,7 @@ from app.domain.schemas.interview import (
 from app.domain.schemas.turn import QuestionKnowledgeRef, ResumeSnippetRef, TurnRead
 from app.domain.services.question_rag_service import QuestionRAGService
 from app.domain.services.report_service import ReportService
+from app.domain.services.resume_parser_service import ResumeParserService
 from app.domain.services.resume_rag_service import ResumeRAGService
 from app.domain.services.scoring_service import ScoringService
 from app.infra.llm.base import BaseLLMProvider
@@ -67,7 +69,6 @@ class InterviewService:
                     id=interview.id,
                     target_role=interview.target_role,
                     level=interview.level,
-                    round_type=interview.round_type,
                     status=interview.status,
                     provider=interview.provider,
                     model_name=interview.model_name,
@@ -90,6 +91,11 @@ class InterviewService:
             return None
 
         report = self.report_service.get_report(interview_id)
+        runtime_state = InterviewAgentState(
+            interview=interview,
+            turns=sorted(interview.turns, key=lambda item: item.turn_index),
+            report=report,
+        )
         turns = [
             TurnRead(
                 id=turn.id,
@@ -105,15 +111,17 @@ class InterviewService:
             for turn in sorted(interview.turns, key=lambda item: item.turn_index)
         ]
 
-        resume_preview = None
-        if interview.resume_text:
-            resume_preview = interview.resume_text[:320]
+        resume_preview = interview.resume_text[:320] if interview.resume_text else None
+        resume_profile = (
+            ResumeParserService.extract_profile(interview.resume_text)
+            if interview.resume_text
+            else None
+        )
 
         return InterviewDetailResponse(
             id=interview.id,
             target_role=interview.target_role,
             level=interview.level,
-            round_type=interview.round_type,
             status=interview.status,
             provider=interview.provider,
             model_name=interview.model_name,
@@ -124,6 +132,22 @@ class InterviewService:
             has_resume=bool(interview.resume_text),
             resume_filename=interview.resume_filename,
             resume_preview=resume_preview,
+            resume_profile=resume_profile,
+            current_stage=runtime_state.current_stage.stage_key,
+            current_stage_label=runtime_state.current_stage.stage_label,
+            planned_duration_minutes=runtime_state.planned_duration_minutes,
+            estimated_elapsed_minutes=runtime_state.estimated_elapsed_minutes,
+            estimated_remaining_minutes=runtime_state.estimated_remaining_minutes,
+            stage_plan=[
+                {
+                    "stage_key": item.stage_key,
+                    "stage_label": item.stage_label,
+                    "target_turns": item.target_turns,
+                    "estimated_minutes": item.estimated_minutes,
+                    "focus": item.focus,
+                }
+                for item in runtime_state.stage_plan
+            ],
             turns=turns,
             report=report,
         )

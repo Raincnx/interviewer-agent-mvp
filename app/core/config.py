@@ -18,7 +18,8 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     openai_api_key: str = ""
 
-    max_turns: int = 5
+    max_turns: int = 8
+    interview_duration_minutes: int = 60
     log_level: str = "INFO"
 
     model_config = SettingsConfigDict(

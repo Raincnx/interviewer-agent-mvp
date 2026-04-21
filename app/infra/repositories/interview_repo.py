@@ -13,7 +13,6 @@ class InterviewRepository:
         self,
         target_role: str,
         level: str,
-        round_type: str,
         status: str,
         provider: str,
         model_name: str,
@@ -25,7 +24,7 @@ class InterviewRepository:
         interview = Interview(
             target_role=target_role,
             level=level,
-            round_type=round_type,
+            round_type="standard",
             status=status,
             provider=provider,
             model_name=model_name,

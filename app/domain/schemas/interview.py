@@ -4,13 +4,21 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.domain.schemas.report import ReportRead
+from app.domain.schemas.resume import ResumeProfile
 from app.domain.schemas.turn import TurnRead
+
+
+class InterviewStagePlanItem(BaseModel):
+    stage_key: str
+    stage_label: str
+    target_turns: int
+    estimated_minutes: int
+    focus: str
 
 
 class InterviewCreateRequest(BaseModel):
     target_role: str = Field(default="后端工程师")
     level: str = Field(default="中级")
-    round_type: str = Field(default="项目深挖")
     resume_filename: Optional[str] = None
     resume_text: Optional[str] = None
 
@@ -24,13 +32,18 @@ class InterviewCreateResponse(BaseModel):
     model_name: str
     prompt_version: str
     resume_attached: bool = False
+    current_stage: str
+    current_stage_label: str
+    planned_duration_minutes: int
+    estimated_elapsed_minutes: int
+    estimated_remaining_minutes: int
+    stage_plan: list[InterviewStagePlanItem] = Field(default_factory=list)
 
 
 class InterviewHistoryItem(BaseModel):
     id: str
     target_role: str
     level: str
-    round_type: str
     status: str
     provider: str
     model_name: str
@@ -67,7 +80,6 @@ class InterviewDetailResponse(BaseModel):
     id: str
     target_role: str
     level: str
-    round_type: str
     status: str
     provider: str
     model_name: str
@@ -78,5 +90,12 @@ class InterviewDetailResponse(BaseModel):
     has_resume: bool = False
     resume_filename: Optional[str] = None
     resume_preview: Optional[str] = None
+    resume_profile: Optional[ResumeProfile] = None
+    current_stage: str
+    current_stage_label: str
+    planned_duration_minutes: int
+    estimated_elapsed_minutes: int
+    estimated_remaining_minutes: int
+    stage_plan: list[InterviewStagePlanItem] = Field(default_factory=list)
     turns: list[TurnRead] = Field(default_factory=list)
     report: Optional[ReportRead] = None

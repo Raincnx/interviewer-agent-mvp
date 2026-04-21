@@ -3,6 +3,9 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from app.domain.schemas.resume import ResumeProfile
+from app.domain.services.resume_parser_service import ResumeParserService
+
 
 @dataclass(frozen=True)
 class RetrievedResumeSnippet:
@@ -19,7 +22,14 @@ class RetrievedResumePack:
 
 
 class ResumeRAGService:
-    def retrieve(self, resume_text: str, query: str, *, top_k: int = 3) -> list[RetrievedResumeSnippet]:
+    def retrieve(
+        self,
+        resume_text: str,
+        query: str,
+        *,
+        top_k: int = 3,
+        profile: ResumeProfile | None = None,
+    ) -> list[RetrievedResumeSnippet]:
         resume_text = (resume_text or "").strip()
         if not resume_text:
             return []
@@ -28,16 +38,19 @@ class ResumeRAGService:
         if not query_tokens:
             return []
 
+        profile = profile or ResumeParserService.extract_profile(resume_text)
+        candidates = self._build_candidates(resume_text, profile)
+
         ranked: list[RetrievedResumeSnippet] = []
-        for index, chunk in enumerate(self._chunk_resume(resume_text), start=1):
-            score = self._score_chunk(query_tokens, chunk["section_title"], chunk["excerpt"])
+        for index, candidate in enumerate(candidates, start=1):
+            score = self._score_chunk(query_tokens, candidate["section_title"], candidate["excerpt"])
             if score <= 0:
                 continue
             ranked.append(
                 RetrievedResumeSnippet(
                     snippet_id=f"resume-{index}",
-                    section_title=chunk["section_title"],
-                    excerpt=chunk["excerpt"],
+                    section_title=candidate["section_title"],
+                    excerpt=candidate["excerpt"],
                     score=score,
                 )
             )
@@ -52,52 +65,68 @@ class ResumeRAGService:
 
         lines: list[str] = []
         for index, item in enumerate(items, start=1):
-            title = item.section_title or "未命名段落"
+            title = item.section_title or "未命名片段"
             lines.append(f"[简历片段 {index}] {title}")
             lines.append(item.excerpt)
             lines.append("")
         return "\n".join(lines).strip()
 
+    @classmethod
+    def _build_candidates(cls, resume_text: str, profile: ResumeProfile) -> list[dict[str, str | None]]:
+        candidates: list[dict[str, str | None]] = []
+
+        for project in profile.projects:
+            excerpt_parts = [project.summary]
+            if project.technologies:
+                excerpt_parts.append(f"技术：{', '.join(project.technologies)}")
+            if project.outcomes:
+                excerpt_parts.append(f"结果：{'；'.join(project.outcomes)}")
+            candidates.append(
+                {
+                    "section_title": f"项目：{project.title}",
+                    "excerpt": " | ".join(part for part in excerpt_parts if part)[:420],
+                }
+            )
+
+        for experience in profile.experiences:
+            title = experience.company or experience.role or "经历"
+            candidates.append(
+                {
+                    "section_title": f"经历：{title}",
+                    "excerpt": experience.summary[:420],
+                }
+            )
+
+        for education in profile.educations:
+            title = education.school or education.degree or "教育"
+            candidates.append(
+                {
+                    "section_title": f"教育：{title}",
+                    "excerpt": education.summary[:420],
+                }
+            )
+
+        if profile.skills:
+            candidates.append(
+                {
+                    "section_title": "技能栈",
+                    "excerpt": "、".join(profile.skills[:20]),
+                }
+            )
+
+        if not candidates:
+            candidates.extend(cls._chunk_resume_fallback(resume_text))
+
+        return candidates
+
     @staticmethod
-    def _chunk_resume(resume_text: str) -> list[dict[str, str | None]]:
+    def _chunk_resume_fallback(resume_text: str) -> list[dict[str, str | None]]:
         paragraphs = [part.strip() for part in re.split(r"\n\s*\n", resume_text) if part.strip()]
         chunks: list[dict[str, str | None]] = []
-        buffer: list[str] = []
-        section_title: str | None = None
-
-        def flush() -> None:
-            nonlocal buffer, section_title
-            if not buffer:
-                return
-            excerpt = "\n".join(buffer).strip()
-            chunks.append({"section_title": section_title, "excerpt": excerpt[:420]})
-            buffer = []
-            section_title = None
-
-        for paragraph in paragraphs:
-            first_line = paragraph.splitlines()[0].strip()
-            maybe_title = first_line if len(first_line) <= 18 else None
-            if maybe_title and len(paragraph) <= 80:
-                flush()
-                section_title = maybe_title
-                buffer.append(paragraph)
-                flush()
-                continue
-
-            if section_title is None and maybe_title and any(
-                keyword in maybe_title.lower()
-                for keyword in ["项目", "经历", "教育", "技能", "project", "experience", "education", "skill"]
-            ):
-                flush()
-                section_title = maybe_title
-                buffer.append(paragraph)
-                continue
-
-            if sum(len(part) for part in buffer) + len(paragraph) > 420:
-                flush()
-            buffer.append(paragraph)
-
-        flush()
+        for paragraph in paragraphs[:8]:
+            lines = [line.strip() for line in paragraph.splitlines() if line.strip()]
+            title = lines[0][:30] if lines else "简历内容"
+            chunks.append({"section_title": title, "excerpt": paragraph[:420]})
         return chunks or [{"section_title": "简历内容", "excerpt": resume_text[:420]}]
 
     @classmethod
