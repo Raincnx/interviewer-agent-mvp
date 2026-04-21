@@ -1,0 +1,23 @@
+### Health
+GET http://127.0.0.1:8000/health
+
+### Create interview
+POST http://127.0.0.1:8000/api/interviews
+Content-Type: application/json
+
+{
+  "target_role": "后端开发",
+  "level": "校招",
+  "round_type": "项目面"
+}
+
+### Reply
+POST http://127.0.0.1:8000/api/interviews/{{interview_id}}/reply
+Content-Type: application/json
+
+{
+  "answer": "我做过一个高并发活动系统，负责缓存、异步队列和接口性能优化。"
+}
+
+### Finish
+POST http://127.0.0.1:8000/api/interviews/{{interview_id}}/finish

@@ -9,7 +9,8 @@ from typing import Any
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
-from openai import OpenAI
+from google import genai
+from google.genai import types
 from pydantic import BaseModel, Field
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -19,14 +20,14 @@ TEMPLATES_DIR = BASE_DIR / "templates"
 app = FastAPI(title="Interviewer Agent MVP", version="0.1.0")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5.4")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY", "AIzaSyCoOAfwYgD_l59zBTqFM5QM-dtMSxVSsu0")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3-flash-preview")
+
+if not GEMINI_API_KEY:
+    print("WARNING: GEMINI_API_KEY is not set yet.")
+
+client = genai.Client(api_key="AIzaSyCoOAfwYgD_l59zBTqFM5QM-dtMSxVSsu0")
 MAX_ANSWERS = int(os.getenv("MAX_ANSWERS", "5"))
-
-if not OPENAI_API_KEY:
-    print("WARNING: OPENAI_API_KEY is not set yet.")
-
-client = OpenAI(api_key=OPENAI_API_KEY)
 
 
 class StartInterviewRequest(BaseModel):
@@ -49,6 +50,13 @@ def get_conn() -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     return conn
 
+
+def build_transcript(messages: list[dict[str, str]]) -> str:
+    lines = []
+    for msg in messages:
+        role = "候选人" if msg["role"] == "user" else "面试官"
+        lines.append(f"{role}: {msg['content']}")
+    return "\n".join(lines)
 
 def init_db() -> None:
     conn = get_conn()
@@ -236,66 +244,127 @@ JSON 结构必须严格为：
 
 
 def call_interviewer(messages: list[dict[str, str]], meta: sqlite3.Row) -> str:
-    response = client.responses.create(
-        model=OPENAI_MODEL,
-        instructions=interviewer_instructions(meta),
-        input=messages,
+    transcript = build_transcript(messages)
+
+    prompt = f"""
+以下是当前面试的完整对话记录：
+
+{transcript}
+
+请继续这场技术面试。
+要求：
+1. 只输出面试官下一轮要说的话
+2. 优先基于候选人刚才的回答追问
+3. 如果回答已经比较完整，再切下一题
+4. 输出控制在 30~120 字
+""".strip()
+
+    response = client.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            system_instruction=interviewer_instructions(meta),
+        ),
     )
-    text = (response.output_text or "").strip()
+
+    text = (response.text or "").strip()
     if not text:
-        raise RuntimeError("模型没有返回提问内容")
+        raise RuntimeError("Gemini 没有返回提问内容")
     return text
 
 
 def generate_opening_question(meta: sqlite3.Row) -> str:
-    response = client.responses.create(
-        model=OPENAI_MODEL,
-        instructions=interviewer_instructions(meta),
-        input=[{"role": "user", "content": "请直接开始第一题，不要寒暄。"}],
+    response = client.models.generate_content(
+        model=GEMINI_MODEL,
+        contents="请直接开始第一题，不要寒暄。",
+        config=types.GenerateContentConfig(
+            system_instruction=interviewer_instructions(meta),
+        ),
     )
-    text = (response.output_text or "").strip()
+
+    text = (response.text or "").strip()
     if not text:
-        raise RuntimeError("模型没有返回首题")
+        raise RuntimeError("Gemini 没有返回首题")
     return text
 
 
 def generate_report(messages: list[dict[str, str]], meta: sqlite3.Row) -> dict[str, Any]:
-    prompt_messages = messages + [
-        {
-            "role": "user",
-            "content": "请基于以上完整面试对话，输出最终评分 JSON。",
-        }
-    ]
+    transcript = build_transcript(messages)
 
-    response = client.responses.create(
-        model=OPENAI_MODEL,
-        instructions=grading_instructions(meta),
-        input=prompt_messages,
+    prompt = f"""
+请基于以下完整面试对话，输出最终评分结果。
+
+面试对话：
+{transcript}
+""".strip()
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "overall_score": {"type": "integer"},
+            "dimension_scores": {
+                "type": "object",
+                "properties": {
+                    "基础知识": {"type": "integer"},
+                    "项目深度": {"type": "integer"},
+                    "追问应对": {"type": "integer"},
+                    "表达结构": {"type": "integer"},
+                },
+                "required": ["基础知识", "项目深度", "追问应对", "表达结构"],
+            },
+            "strengths": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+            "weaknesses": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+            "next_actions": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+            "hire_recommendation": {"type": "string"},
+        },
+        "required": [
+            "overall_score",
+            "dimension_scores",
+            "strengths",
+            "weaknesses",
+            "next_actions",
+            "hire_recommendation",
+        ],
+    }
+
+    response = client.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            system_instruction=grading_instructions(meta),
+            response_mime_type="application/json",
+            response_json_schema=schema,
+        ),
     )
 
-    text = (response.output_text or "").strip()
+    text = (response.text or "").strip()
     if not text:
-        raise RuntimeError("模型没有返回评估结果")
+        raise RuntimeError("Gemini 没有返回评估结果")
 
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        # 容错：尽量截取 JSON 主体
-        start = text.find("{")
-        end = text.rfind("}")
-        if start != -1 and end != -1 and end > start:
-            return json.loads(text[start : end + 1])
-        raise RuntimeError(f"评估 JSON 解析失败，原始输出：{text}")
+    return json.loads(text)
 
 
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={}
+    )
 
 
 @app.get("/health")
 def health():
-    return {"ok": True, "model": OPENAI_MODEL}
+    return {"ok": True, "model": GEMINI_MODEL}
 
 
 @app.post("/api/start")
