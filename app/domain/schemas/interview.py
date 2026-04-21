@@ -11,6 +11,8 @@ class InterviewCreateRequest(BaseModel):
     target_role: str = Field(default="后端工程师")
     level: str = Field(default="中级")
     round_type: str = Field(default="项目深挖")
+    resume_filename: Optional[str] = None
+    resume_text: Optional[str] = None
 
 
 class InterviewCreateResponse(BaseModel):
@@ -21,6 +23,7 @@ class InterviewCreateResponse(BaseModel):
     provider: str
     model_name: str
     prompt_version: str
+    resume_attached: bool = False
 
 
 class InterviewHistoryItem(BaseModel):
@@ -38,6 +41,8 @@ class InterviewHistoryItem(BaseModel):
     updated_at: datetime
     overall_score: Optional[int] = None
     hire_recommendation: Optional[str] = None
+    has_resume: bool = False
+    resume_filename: Optional[str] = None
 
 
 class ReplyRequest(BaseModel):
@@ -70,5 +75,8 @@ class InterviewDetailResponse(BaseModel):
     max_turns: int
     created_at: datetime
     updated_at: datetime
-    turns: list[TurnRead] = []
+    has_resume: bool = False
+    resume_filename: Optional[str] = None
+    resume_preview: Optional[str] = None
+    turns: list[TurnRead] = Field(default_factory=list)
     report: Optional[ReportRead] = None

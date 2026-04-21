@@ -17,6 +17,8 @@ class TurnRepository:
         question_text: str,
         question_kind: str = "question",
         followup_reason: str | None = None,
+        knowledge_refs_json: str | None = None,
+        resume_refs_json: str | None = None,
     ) -> Turn:
         turn = Turn(
             interview_id=interview_id,
@@ -24,6 +26,8 @@ class TurnRepository:
             question_text=question_text,
             question_kind=question_kind,
             followup_reason=followup_reason,
+            knowledge_refs_json=knowledge_refs_json,
+            resume_refs_json=resume_refs_json,
         )
         self.db.add(turn)
         self.db.flush()

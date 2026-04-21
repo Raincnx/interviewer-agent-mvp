@@ -8,11 +8,11 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 class InterviewQuestion(BaseModel):
     title: str = Field(description="题目简述")
-    category: str = Field(description="分类，如：RL、Python、算法、系统设计")
+    category: str = Field(description="分类，例如：AI Agent、Python、系统设计")
     difficulty: str = Field(description="难度：简单、中等、困难")
     content: str = Field(description="完整的题目描述")
     standard_answer: str = Field(description="标准答案或核心要点")
-    follow_up_suggestions: list[str] = Field(default_factory=list, description="推荐的追问路径")
+    follow_up_suggestions: list[str] = Field(default_factory=list, description="推荐追问路径")
     tags: list[str] = Field(default_factory=list, description="题目标记标签")
     source_url: Optional[str] = None
     source_title: Optional[str] = None

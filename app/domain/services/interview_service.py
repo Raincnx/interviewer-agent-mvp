@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from sqlalchemy.orm import Session
 
 from app.agent.loop import InterviewerAgent
@@ -13,8 +15,10 @@ from app.domain.schemas.interview import (
     InterviewHistoryItem,
     ReplyResponse,
 )
-from app.domain.schemas.turn import TurnRead
+from app.domain.schemas.turn import QuestionKnowledgeRef, ResumeSnippetRef, TurnRead
+from app.domain.services.question_rag_service import QuestionRAGService
 from app.domain.services.report_service import ReportService
+from app.domain.services.resume_rag_service import ResumeRAGService
 from app.domain.services.scoring_service import ScoringService
 from app.infra.llm.base import BaseLLMProvider
 from app.infra.repositories.interview_repo import InterviewRepository
@@ -31,6 +35,8 @@ class InterviewService:
         turn_repo: TurnRepository,
         scoring_service: ScoringService,
         report_service: ReportService,
+        question_rag_service: QuestionRAGService | None = None,
+        resume_rag_service: ResumeRAGService | None = None,
     ) -> None:
         self.interview_repo = interview_repo
         self.report_service = report_service
@@ -43,6 +49,8 @@ class InterviewService:
                 turn_repo=turn_repo,
                 scoring_service=scoring_service,
                 report_service=report_service,
+                question_rag_service=question_rag_service,
+                resume_rag_service=resume_rag_service,
             )
         )
 
@@ -70,6 +78,8 @@ class InterviewService:
                     updated_at=interview.updated_at,
                     overall_score=interview.report.overall_score if interview.report else None,
                     hire_recommendation=interview.report.hire_recommendation if interview.report else None,
+                    has_resume=bool(interview.resume_text),
+                    resume_filename=interview.resume_filename,
                 )
             )
         return items
@@ -81,9 +91,23 @@ class InterviewService:
 
         report = self.report_service.get_report(interview_id)
         turns = [
-            TurnRead.model_validate(turn)
+            TurnRead(
+                id=turn.id,
+                turn_index=turn.turn_index,
+                question_text=turn.question_text,
+                question_kind=turn.question_kind,
+                followup_reason=turn.followup_reason,
+                candidate_answer=turn.candidate_answer,
+                knowledge_refs=[QuestionKnowledgeRef(**item) for item in json.loads(turn.knowledge_refs_json or "[]")],
+                resume_refs=[ResumeSnippetRef(**item) for item in json.loads(turn.resume_refs_json or "[]")],
+                created_at=turn.created_at,
+            )
             for turn in sorted(interview.turns, key=lambda item: item.turn_index)
         ]
+
+        resume_preview = None
+        if interview.resume_text:
+            resume_preview = interview.resume_text[:320]
 
         return InterviewDetailResponse(
             id=interview.id,
@@ -97,6 +121,9 @@ class InterviewService:
             max_turns=interview.max_turns,
             created_at=interview.created_at,
             updated_at=interview.updated_at,
+            has_resume=bool(interview.resume_text),
+            resume_filename=interview.resume_filename,
+            resume_preview=resume_preview,
             turns=turns,
             report=report,
         )

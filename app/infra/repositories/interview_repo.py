@@ -19,6 +19,8 @@ class InterviewRepository:
         model_name: str,
         prompt_version: str,
         max_turns: int,
+        resume_filename: str | None = None,
+        resume_text: str | None = None,
     ) -> Interview:
         interview = Interview(
             target_role=target_role,
@@ -29,6 +31,8 @@ class InterviewRepository:
             model_name=model_name,
             prompt_version=prompt_version,
             max_turns=max_turns,
+            resume_filename=resume_filename,
+            resume_text=resume_text,
         )
         self.db.add(interview)
         self.db.flush()

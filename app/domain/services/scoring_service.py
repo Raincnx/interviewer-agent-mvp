@@ -42,12 +42,7 @@ class ScoringService:
                         "追问应对": {"type": "integer"},
                         "表达沟通": {"type": "integer"},
                     },
-                    "required": [
-                        "基础知识",
-                        "项目深度",
-                        "追问应对",
-                        "表达沟通",
-                    ],
+                    "required": ["基础知识", "项目深度", "追问应对", "表达沟通"],
                 },
                 "strengths": {"type": "array", "items": {"type": "string"}},
                 "weaknesses": {"type": "array", "items": {"type": "string"}},

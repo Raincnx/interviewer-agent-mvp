@@ -6,18 +6,17 @@
   <title>面试智能体控制台</title>
   <style>
     :root {
-      --bg: #f6f1e7;
-      --panel: rgba(255, 251, 244, 0.9);
-      --panel-strong: #fffdf8;
-      --line: rgba(73, 52, 35, 0.14);
+      --bg: #f6efe4;
+      --panel: rgba(255, 251, 244, 0.92);
+      --line: rgba(92, 64, 39, 0.12);
       --text: #1f1a17;
-      --muted: #6f6459;
-      --accent: #b35731;
-      --accent-dark: #8d421e;
-      --accent-soft: #f4dfd1;
+      --muted: #6e6357;
+      --accent: #b45a30;
+      --accent-strong: #8c421d;
+      --assistant: #f8ebd7;
       --candidate: #e6f4ea;
-      --assistant: #f8ebd6;
-      --shadow: 0 24px 60px rgba(88, 59, 34, 0.12);
+      --shadow: 0 20px 50px rgba(88, 59, 34, 0.12);
+      --danger: #b3261e;
       --success: #2e7d32;
     }
 
@@ -29,235 +28,150 @@
       font-family: "Microsoft YaHei", "PingFang SC", "Noto Serif SC", serif;
       color: var(--text);
       background:
-        radial-gradient(circle at top left, rgba(232, 193, 150, 0.54), transparent 34%),
-        radial-gradient(circle at bottom right, rgba(179, 87, 49, 0.18), transparent 26%),
-        linear-gradient(135deg, #fbf6ee 0%, #f2e4cf 48%, #f8f2e8 100%);
-      padding: 28px 18px 42px;
+        radial-gradient(circle at top left, rgba(232, 193, 150, 0.52), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(180, 90, 48, 0.18), transparent 28%),
+        linear-gradient(135deg, #fbf6ef 0%, #f2e3cd 52%, #f8f2e8 100%);
+      padding: 24px 18px 40px;
     }
 
     .shell {
-      max-width: 1320px;
+      max-width: 1440px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: 380px minmax(0, 1fr);
-      gap: 22px;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 20px;
       align-items: start;
     }
 
     .panel {
       background: var(--panel);
-      backdrop-filter: blur(14px);
       border: 1px solid var(--line);
-      border-radius: 28px;
+      border-radius: 26px;
       box-shadow: var(--shadow);
       overflow: hidden;
+      backdrop-filter: blur(14px);
     }
 
     .sidebar {
-      padding: 26px;
+      padding: 24px;
       position: sticky;
-      top: 24px;
+      top: 18px;
     }
 
-    .eyebrow {
+    .badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       padding: 8px 12px;
       border-radius: 999px;
-      background: rgba(179, 87, 49, 0.1);
-      color: var(--accent-dark);
+      background: rgba(180, 90, 48, 0.1);
+      color: var(--accent-strong);
       font-size: 12px;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
     h1, h2, h3 {
       margin: 0;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.02em;
     }
 
     .sidebar h1 {
       margin-top: 16px;
-      font-size: clamp(2rem, 4vw, 3rem);
-      line-height: 1.05;
+      font-size: 40px;
+      line-height: 1.06;
     }
 
-    .sidebar p, .workspace-head p {
-      margin: 14px 0 0;
+    .sidebar p,
+    .workspace-head p,
+    .section-note,
+    .meta {
       color: var(--muted);
-      line-height: 1.8;
-      font-size: 15px;
+      line-height: 1.75;
     }
 
     .stats {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
-      margin-top: 22px;
+      margin-top: 20px;
     }
 
     .stat,
-    .config-panel {
-      background: rgba(255, 255, 255, 0.58);
+    .side-block,
+    .question-list-panel,
+    .question-detail,
+    .report-card {
       border: 1px solid var(--line);
       border-radius: 18px;
+      background: rgba(255, 255, 255, 0.58);
     }
 
     .stat {
-      padding: 16px;
+      padding: 14px;
     }
 
     .stat strong {
       display: block;
-      font-size: 18px;
-      color: var(--accent-dark);
       margin-bottom: 6px;
+      color: var(--accent-strong);
+      font-size: 16px;
       word-break: break-word;
     }
 
-    .stat span,
-    .hint,
-    .meta,
-    .micro {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.7;
-    }
-
-    .config-panel {
-      margin-top: 22px;
+    .side-block {
+      margin-top: 18px;
       padding: 16px;
     }
 
-    .config-panel h3 {
-      margin-bottom: 10px;
-    }
-
-    .config-grid {
-      display: grid;
-      gap: 12px;
-      margin-top: 12px;
-    }
-
-    .history {
-      margin-top: 24px;
-      padding-top: 24px;
-      border-top: 1px solid var(--line);
-    }
-
-    .history-head {
+    .side-head,
+    .tab-switch,
+    .toolbar,
+    .control-row {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      justify-content: space-between;
       gap: 12px;
+      flex-wrap: wrap;
     }
 
-    .history-list {
+    .history-list,
+    .question-list {
       display: grid;
       gap: 10px;
-      max-height: 340px;
+      margin-top: 12px;
+      max-height: 320px;
       overflow: auto;
-      padding-right: 4px;
+      padding-right: 2px;
     }
 
-    .history-empty {
-      padding: 20px;
-      border-radius: 18px;
-      border: 1px dashed rgba(73, 52, 35, 0.18);
-      color: var(--muted);
-      background: rgba(255, 255, 255, 0.34);
-      text-align: center;
+    .question-list {
+      max-height: none;
+      padding-right: 0;
     }
 
-    .history-item {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 14px;
-      background: rgba(255, 255, 255, 0.54);
-      cursor: pointer;
-      transition: transform 140ms ease, box-shadow 140ms ease;
-      text-align: left;
-    }
-
-    .history-item:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 14px 24px rgba(88, 59, 34, 0.08);
-    }
-
-    .history-item.active {
-      border-color: rgba(179, 87, 49, 0.42);
-      background: rgba(244, 223, 209, 0.72);
-    }
-
-    .history-item strong {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 16px;
-    }
-
-    .workspace {
-      display: grid;
-      grid-template-rows: auto auto 1fr auto;
-      min-height: 900px;
-    }
-
-    .workspace-head {
-      padding: 26px 30px 18px;
-      border-bottom: 1px solid var(--line);
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0)),
-        radial-gradient(circle at top right, rgba(179, 87, 49, 0.1), transparent 38%);
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      padding: 22px 30px 18px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 13px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    select,
-    textarea,
     button,
-    input {
+    input,
+    select,
+    textarea {
       width: 100%;
-      border-radius: 18px;
       border: 1px solid var(--line);
+      border-radius: 16px;
       font: inherit;
     }
 
+    input,
     select,
-    textarea,
-    input {
-      background: rgba(255, 255, 255, 0.84);
+    textarea {
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.86);
       color: var(--text);
-      padding: 14px 16px;
     }
 
-    select:focus,
-    textarea:focus,
-    input:focus {
-      outline: 2px solid rgba(179, 87, 49, 0.15);
-      border-color: rgba(179, 87, 49, 0.42);
-    }
-
-    .control-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 12px;
-      padding: 0 30px 24px;
+    textarea {
+      min-height: 132px;
+      resize: vertical;
+      line-height: 1.75;
     }
 
     button {
@@ -267,91 +181,179 @@
 
     button:hover:not(:disabled) {
       transform: translateY(-1px);
-      box-shadow: 0 12px 28px rgba(88, 59, 34, 0.12);
+      box-shadow: 0 10px 24px rgba(88, 59, 34, 0.12);
     }
 
     button:disabled {
+      opacity: 0.58;
       cursor: not-allowed;
-      opacity: 0.55;
-      box-shadow: none;
       transform: none;
+      box-shadow: none;
     }
 
     .primary {
-      background: linear-gradient(135deg, var(--accent) 0%, #cb7247 100%);
+      padding: 14px 18px;
+      background: linear-gradient(135deg, var(--accent), #cb7449);
       border: none;
-      color: #fff9f6;
-      padding: 14px 20px;
-      min-width: 180px;
+      color: white;
     }
 
-    .secondary {
+    .secondary,
+    .tab-btn,
+    .history-item,
+    .question-item {
       background: rgba(255, 255, 255, 0.72);
-      color: var(--accent-dark);
-      padding: 14px 20px;
-      min-width: 160px;
+      color: var(--text);
     }
 
-    .success {
-      color: var(--success);
-      margin-top: 10px;
-      font-size: 13px;
-      min-height: 22px;
+    .secondary,
+    .tab-btn {
+      padding: 12px 16px;
+    }
+
+    .tab-btn {
+      min-width: 140px;
+      color: var(--accent-strong);
+    }
+
+    .tab-btn.active,
+    .history-item.active,
+    .question-item.active {
+      background: rgba(244, 223, 209, 0.76);
+      border-color: rgba(180, 90, 48, 0.34);
+    }
+
+    .history-item,
+    .question-item {
+      text-align: left;
+      padding: 14px;
+    }
+
+    .history-item strong,
+    .question-item strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .empty,
+    .notice,
+    .resume-preview {
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px dashed rgba(92, 64, 39, 0.18);
+      background: rgba(255, 255, 255, 0.38);
+      color: var(--muted);
       line-height: 1.7;
-      white-space: pre-wrap;
+    }
+
+    .workspace {
+      min-height: 960px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .workspace-head {
+      padding: 24px 28px 18px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0)),
+        radial-gradient(circle at top right, rgba(180, 90, 48, 0.1), transparent 38%);
+    }
+
+    .tabs {
+      padding: 18px 28px 0;
+    }
+
+    .tab-panel {
+      display: none;
+      flex: 1;
+      padding: 20px 28px 28px;
+      border-top: 1px solid var(--line);
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 180px;
+      gap: 12px;
+      align-items: end;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
 
     .status {
-      margin-left: auto;
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      color: var(--muted);
       min-height: 24px;
+      color: var(--muted);
+      margin-left: auto;
     }
 
     .status-dot {
       width: 10px;
       height: 10px;
       border-radius: 999px;
-      background: #d4bfa5;
+      background: #d7c3ab;
     }
 
     .status.busy .status-dot {
       background: var(--accent);
-      box-shadow: 0 0 0 6px rgba(179, 87, 49, 0.12);
+      box-shadow: 0 0 0 6px rgba(180, 90, 48, 0.12);
     }
 
-    .stage {
-      border-top: 1px solid var(--line);
-      padding: 22px 30px 30px;
+    .resume-box {
+      margin-bottom: 18px;
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.54);
+    }
+
+    .resume-preview {
+      margin-top: 12px;
+      white-space: pre-wrap;
+      max-height: 180px;
+      overflow: auto;
+    }
+
+    .resume-meta {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
     }
 
     .chat-shell {
-      min-height: 250px;
+      min-height: 260px;
       max-height: 420px;
       overflow: auto;
-      padding-right: 4px;
-      margin-bottom: 18px;
-    }
-
-    .empty-note {
-      border: 1px dashed rgba(73, 52, 35, 0.18);
-      border-radius: 18px;
-      padding: 22px;
-      color: var(--muted);
-      text-align: center;
-      background: rgba(255, 255, 255, 0.35);
+      padding-right: 2px;
     }
 
     .msg {
-      border-radius: 22px;
-      border: 1px solid var(--line);
-      padding: 16px 18px;
       margin-bottom: 12px;
+      padding: 16px 18px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
       line-height: 1.75;
       white-space: pre-wrap;
-      animation: rise 220ms ease;
     }
 
     .msg.assistant { background: var(--assistant); }
@@ -361,9 +363,45 @@
       display: block;
       margin-bottom: 6px;
       font-size: 12px;
+      color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.08em;
+    }
+
+    .msg-refs {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed rgba(92, 64, 39, 0.16);
+    }
+
+    .msg-refs strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--accent-strong);
+      font-size: 13px;
+    }
+
+    .ref-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .ref-chip {
+      display: block;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(92, 64, 39, 0.12);
+      background: rgba(255, 255, 255, 0.58);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .ref-chip span {
+      display: block;
+      margin-top: 4px;
       color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
     }
 
     .composer {
@@ -371,26 +409,13 @@
       grid-template-columns: minmax(0, 1fr) 180px;
       gap: 14px;
       align-items: end;
-    }
-
-    textarea {
-      min-height: 140px;
-      resize: vertical;
-      line-height: 1.7;
-    }
-
-    .composer-side {
-      display: grid;
-      gap: 12px;
+      margin-top: 18px;
     }
 
     .report-card {
       display: none;
-      margin-top: 22px;
-      padding: 24px;
-      border-radius: 24px;
-      border: 1px solid var(--line);
-      background: var(--panel-strong);
+      margin-top: 20px;
+      padding: 20px;
     }
 
     .report-card.visible {
@@ -400,60 +425,50 @@
     .report-head {
       display: flex;
       justify-content: space-between;
-      align-items: start;
+      align-items: flex-start;
       gap: 14px;
       flex-wrap: wrap;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .score-chip {
-      min-width: 112px;
+      min-width: 118px;
       padding: 16px 18px;
-      border-radius: 20px;
-      background: linear-gradient(135deg, var(--accent-soft), #fff1e6);
-      border: 1px solid rgba(179, 87, 49, 0.16);
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(244, 223, 209, 0.9), rgba(255, 241, 230, 0.95));
+      border: 1px solid rgba(180, 90, 48, 0.18);
       text-align: center;
     }
 
     .score-chip strong {
       display: block;
       font-size: 34px;
-      color: var(--accent-dark);
+      color: var(--accent-strong);
       line-height: 1;
     }
 
-    .score-chip span {
-      color: var(--muted);
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .report-grid {
+    .report-grid,
+    .question-bank-layout {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
     }
 
     .report-block {
+      padding: 16px 18px;
       border-radius: 18px;
       border: 1px solid var(--line);
       background: rgba(249, 243, 233, 0.82);
-      padding: 16px 18px;
     }
 
-    .report-block h3 {
+    .report-block h3,
+    .question-list-panel h3,
+    .question-detail h3 {
       margin-bottom: 12px;
-      font-size: 15px;
+      color: var(--muted);
+      font-size: 14px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: var(--muted);
-    }
-
-    .report-block ul {
-      margin: 0;
-      padding-left: 18px;
-      line-height: 1.7;
     }
 
     .dimension-list {
@@ -466,39 +481,60 @@
       justify-content: space-between;
       gap: 12px;
       padding-bottom: 10px;
-      border-bottom: 1px dashed rgba(73, 52, 35, 0.14);
+      border-bottom: 1px dashed rgba(92, 64, 39, 0.14);
     }
 
     .dimension-item:last-child {
-      border-bottom: none;
       padding-bottom: 0;
+      border-bottom: none;
     }
 
-    .pill {
+    .pill,
+    .tag {
       display: inline-flex;
       align-items: center;
-      border-radius: 999px;
       padding: 6px 10px;
-      background: rgba(179, 87, 49, 0.12);
-      color: var(--accent-dark);
+      border-radius: 999px;
+      background: rgba(180, 90, 48, 0.12);
+      color: var(--accent-strong);
       font-size: 13px;
     }
 
-    @keyframes rise {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
     }
 
-    @media (max-width: 1040px) {
+    .detail-block {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px dashed rgba(92, 64, 39, 0.14);
+    }
+
+    .detail-block ul,
+    .report-block ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      line-height: 1.75;
+    }
+
+    .success { color: var(--success); }
+    .error { color: var(--danger); }
+
+    @media (max-width: 1120px) {
       .shell { grid-template-columns: 1fr; }
       .sidebar { position: static; }
     }
 
-    @media (max-width: 860px) {
+    @media (max-width: 840px) {
       .form-grid,
-      .report-grid,
+      .field-grid,
       .composer,
-      .stats {
+      .stats,
+      .report-grid,
+      .question-bank-layout {
         grid-template-columns: 1fr;
       }
 
@@ -506,47 +542,49 @@
         width: 100%;
         margin-left: 0;
       }
-
-      .workspace {
-        min-height: auto;
-      }
     }
   </style>
 </head>
 <body>
   <div class="shell">
     <aside class="panel sidebar">
-      <div class="eyebrow">Runtime Config</div>
+      <div class="badge">Runtime Config</div>
       <h1>面试智能体控制台</h1>
-      <p>这里可以直接切换运行时 Provider、模型、Prompt 版本和评分后端。保存后，新创建的面试会使用当前配置；历史面试会保留它创建时的记录。</p>
+      <p>这里可以切换运行时 Provider、模型、Prompt 版本和评分后端。你也可以上传简历，让面试官优先围绕候选人的真实经历发问。</p>
 
       <div class="stats">
         <div class="stat">
           <strong id="providerValue">mock（本地演示）</strong>
-          <span>当前 Provider</span>
+          <span class="meta">当前 Provider</span>
         </div>
         <div class="stat">
           <strong id="modelValue">mock-interviewer-v1</strong>
-          <span>当前模型</span>
+          <span class="meta">当前模型</span>
         </div>
         <div class="stat">
           <strong id="promptValue">v1</strong>
-          <span>Prompt 版本</span>
+          <span class="meta">Prompt 版本</span>
         </div>
         <div class="stat">
           <strong id="scoringBackendValue">provider</strong>
-          <span>评分后端</span>
+          <span class="meta">评分后端</span>
         </div>
         <div class="stat">
           <strong id="turnValue">0</strong>
-          <span>已回答轮数</span>
+          <span class="meta">已回答轮数</span>
+        </div>
+        <div class="stat">
+          <strong id="questionCountValue">0</strong>
+          <span class="meta">题库题目数</span>
         </div>
       </div>
 
-      <section class="config-panel">
-        <h3>运行时模型配置</h3>
-        <div class="hint">如果要切换到真实模型，先选择 Provider 和评分后端，再填写模型名与 API Key。`PydanticAI` 评分在 `mock` 模式下也能本地运行。</div>
-        <div class="config-grid">
+      <section class="side-block">
+        <div class="side-head">
+          <h3>运行时模型配置</h3>
+        </div>
+        <p class="section-note">切到真实模型时再填 API Key；保留 `mock` 则整条链路都可以本地演示。</p>
+        <div class="field-grid">
           <div>
             <label for="runtimeProvider">Provider</label>
             <select id="runtimeProvider">
@@ -556,126 +594,158 @@
             </select>
           </div>
           <div>
+            <label for="runtimeScoringBackend">评分后端</label>
+            <select id="runtimeScoringBackend">
+              <option value="provider">provider</option>
+              <option value="pydanticai">pydanticai</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-grid" style="margin-top: 12px;">
+          <div>
             <label for="runtimeModel">模型名</label>
-            <input id="runtimeModel" type="text" placeholder="例如 gemini-2.5-flash 或 gpt-4.1-mini" />
+            <input id="runtimeModel" type="text" placeholder="例如 gemini-3-flash-preview" />
           </div>
           <div>
             <label for="runtimePromptVersion">Prompt 版本</label>
             <input id="runtimePromptVersion" type="text" value="v1" />
           </div>
-          <div>
-            <label for="runtimeScoringBackend">评分后端</label>
-            <select id="runtimeScoringBackend">
-              <option value="provider">provider（现有适配层）</option>
-              <option value="pydanticai">pydanticai</option>
-            </select>
-          </div>
-          <div>
-            <label for="runtimeApiKey">API Key</label>
-            <input id="runtimeApiKey" type="password" placeholder="切到真实模型时填写，mock 可留空" />
-          </div>
-          <button id="saveRuntimeBtn" class="primary">保存配置</button>
         </div>
-        <div id="runtimeNotice" class="success"></div>
+        <div style="margin-top: 12px;">
+          <label for="runtimeApiKey">API Key</label>
+          <input id="runtimeApiKey" type="password" placeholder="mock 模式可留空" />
+        </div>
+        <button id="saveRuntimeBtn" class="primary" style="margin-top: 12px;">保存配置</button>
+        <div id="runtimeNotice" class="meta" style="margin-top: 10px;"></div>
       </section>
 
-      <section class="history">
-        <div class="history-head">
+      <section class="side-block">
+        <div class="side-head">
           <h3>历史面试</h3>
-          <button id="refreshHistoryBtn" class="secondary">刷新列表</button>
+          <button id="refreshHistoryBtn" class="secondary" type="button">刷新列表</button>
         </div>
         <div id="historyList" class="history-list">
-          <div class="history-empty">还没有历史面试记录。</div>
+          <div class="empty">还没有历史面试记录。</div>
         </div>
+      </section>
+
+      <section class="side-block">
+        <div class="side-head">
+          <h3>题库概览</h3>
+          <button id="refreshQuestionBankBtn" class="secondary" type="button">刷新题库</button>
+        </div>
+        <div id="questionBankSummary" class="meta" style="margin-top: 10px;">题库尚未加载。</div>
       </section>
     </aside>
 
     <main class="panel workspace">
       <section class="workspace-head">
         <h2>当前工作台</h2>
-        <p>先保存运行时配置，再开始一场面试。你可以在页面里连续完成 5 轮问答、查看历史、提前结束并生成结构化评分报告。</p>
+        <p>左边负责运行时配置和历史记录，右边既可以直接跑一场面试，也可以浏览已采集的中文 Agent 岗题库。上传简历后，Agent 会优先围绕简历项目追问，再用题库知识补深度。</p>
       </section>
 
-      <section class="form-grid">
-        <div>
-          <label for="target_role">岗位</label>
-          <select id="target_role">
-            <option>后端工程师</option>
-            <option>前端工程师</option>
-            <option>全栈工程师</option>
-            <option>平台工程师</option>
-          </select>
-        </div>
-        <div>
-          <label for="level">级别</label>
-          <select id="level">
-            <option>实习</option>
-            <option selected>中级</option>
-            <option>高级</option>
-            <option>资深</option>
-          </select>
-        </div>
-        <div>
-          <label for="round_type">轮次</label>
-          <select id="round_type">
-            <option selected>项目深挖</option>
-            <option>系统设计</option>
-            <option>问题排查</option>
-            <option>行为面试</option>
-          </select>
+      <section class="tabs">
+        <div class="tab-switch">
+          <button id="interviewTabBtn" class="tab-btn active" type="button">面试工作台</button>
+          <button id="questionBankTabBtn" class="tab-btn" type="button">题库浏览</button>
         </div>
       </section>
 
-      <section class="control-row">
-        <button id="startBtn" class="primary">开始面试</button>
-        <button id="restartBtn" class="secondary">重置界面</button>
-        <div id="status" class="status">
-          <span class="status-dot"></span>
-          <span id="statusText">准备就绪</span>
+      <section id="interviewTab" class="tab-panel active">
+        <div class="form-grid">
+          <div>
+            <label for="target_role">岗位</label>
+            <select id="target_role">
+              <option>后端工程师</option>
+              <option>前端工程师</option>
+              <option>全栈工程师</option>
+              <option>AI Agent 开发工程师</option>
+            </select>
+          </div>
+          <div>
+            <label for="level">级别</label>
+            <select id="level">
+              <option>实习</option>
+              <option selected>中级</option>
+              <option>高级</option>
+              <option>资深</option>
+            </select>
+          </div>
+          <div>
+            <label for="round_type">轮次</label>
+            <select id="round_type">
+              <option selected>项目深挖</option>
+              <option>系统设计</option>
+              <option>问题排查</option>
+              <option>行为面试</option>
+            </select>
+          </div>
         </div>
-      </section>
 
-      <section class="stage">
+        <div class="resume-box">
+          <div class="toolbar">
+            <div>
+              <h3>候选人简历</h3>
+              <p class="section-note">支持 PDF、DOCX、TXT、Markdown。解析后会在创建面试时一并带入，让问题更贴近真实经历。</p>
+            </div>
+          </div>
+          <div class="field-grid">
+            <div>
+              <label for="resumeFile">上传简历</label>
+              <input id="resumeFile" type="file" accept=".pdf,.docx,.txt,.md" />
+            </div>
+            <button id="parseResumeBtn" class="secondary" type="button">解析简历</button>
+          </div>
+          <div id="resumeMeta" class="resume-meta">当前未附加简历。</div>
+          <div id="resumePreview" class="resume-preview" style="display: none;"></div>
+        </div>
+
+        <div class="control-row">
+          <button id="startBtn" class="primary" type="button">开始面试</button>
+          <button id="restartBtn" class="secondary" type="button">重置界面</button>
+          <div id="status" class="status">
+            <span class="status-dot"></span>
+            <span id="statusText">准备就绪</span>
+          </div>
+        </div>
+
         <div id="chatShell" class="chat-shell">
-          <div id="emptyState" class="empty-note">你可以先在左侧切换运行时配置，然后开始一场新面试；或者从历史面试中选择一条记录进行查看。</div>
-          <div id="chat"></div>
+          <div id="emptyState" class="empty">你可以先保存运行时配置，然后开始一场新面试。上传简历后，首轮问题会优先围绕简历中的项目和经历展开。</div>
         </div>
 
         <div class="composer">
           <div>
-            <label for="answer">候选人回答</label>
-            <textarea id="answer" placeholder="在这里输入当前轮次的回答。按 Ctrl/Cmd + Enter 可以快速提交。"></textarea>
+            <label for="answerBox">候选人回答</label>
+            <textarea id="answerBox" placeholder="在这里输入回答；支持 Ctrl/Cmd + Enter 快速提交。"></textarea>
           </div>
-          <div class="composer-side">
-            <button id="replyBtn" class="primary" disabled>提交回答</button>
-            <button id="finishBtn" class="secondary" disabled>结束并评分</button>
+          <div style="display: grid; gap: 12px;">
+            <button id="replyBtn" class="primary" type="button" disabled>提交回答</button>
+            <button id="finishBtn" class="secondary" type="button" disabled>提前结束并生成报告</button>
           </div>
         </div>
 
         <section id="reportCard" class="report-card">
           <div class="report-head">
             <div>
-              <div class="eyebrow">Structured Report</div>
-              <h2 style="margin-top: 12px;">面试评分报告</h2>
-              <p id="reportRecommendation" class="meta" style="margin-top: 8px;"></p>
+              <h3>结构化面试报告</h3>
+              <p id="reportRecommendation" class="section-note">录用建议：</p>
             </div>
             <div class="score-chip">
               <strong id="overallScore">0</strong>
               <span>总分</span>
             </div>
           </div>
-
           <div class="report-grid">
             <div class="report-block">
               <h3>维度得分</h3>
               <div id="dimensionScores" class="dimension-list"></div>
             </div>
             <div class="report-block">
-              <h3>优点</h3>
+              <h3>优势亮点</h3>
               <ul id="strengths"></ul>
             </div>
             <div class="report-block">
-              <h3>待改进项</h3>
+              <h3>待提升点</h3>
               <ul id="weaknesses"></ul>
             </div>
             <div class="report-block">
@@ -685,50 +755,87 @@
           </div>
         </section>
       </section>
+
+      <section id="questionBankTab" class="tab-panel">
+        <div class="toolbar" style="margin-bottom: 16px;">
+          <div>
+            <h3>题库浏览</h3>
+            <p class="section-note">这里既可以作为 Agent 的知识库，也可以直接拿来复习知识点。</p>
+          </div>
+          <button id="refreshQuestionBankBtnMain" class="secondary" type="button">刷新题库</button>
+        </div>
+
+        <div class="question-bank-layout">
+          <div class="question-list-panel">
+            <h3>题目列表</h3>
+            <div id="questionBankMeta" class="meta">题库尚未加载。</div>
+            <div id="questionList" class="question-list" style="margin-top: 12px;">
+              <div class="empty">还没有加载到题目。</div>
+            </div>
+          </div>
+          <div id="questionDetail" class="question-detail">
+            <h3>题目详情</h3>
+            <div class="empty">选择一条题目后，这里会显示完整内容。</div>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
   <script>
-    let activeInterviewId = null;
-    let answeredTurns = 0;
-    let interviewDone = false;
-
-    const historyList = document.getElementById("historyList");
     const providerValue = document.getElementById("providerValue");
     const modelValue = document.getElementById("modelValue");
     const promptValue = document.getElementById("promptValue");
     const scoringBackendValue = document.getElementById("scoringBackendValue");
     const turnValue = document.getElementById("turnValue");
-    const status = document.getElementById("status");
-    const statusText = document.getElementById("statusText");
-    const chat = document.getElementById("chat");
-    const emptyState = document.getElementById("emptyState");
-    const answerBox = document.getElementById("answer");
-    const reportCard = document.getElementById("reportCard");
-    const startBtn = document.getElementById("startBtn");
-    const restartBtn = document.getElementById("restartBtn");
-    const replyBtn = document.getElementById("replyBtn");
-    const finishBtn = document.getElementById("finishBtn");
+    const questionCountValue = document.getElementById("questionCountValue");
     const runtimeProvider = document.getElementById("runtimeProvider");
     const runtimeModel = document.getElementById("runtimeModel");
     const runtimePromptVersion = document.getElementById("runtimePromptVersion");
     const runtimeScoringBackend = document.getElementById("runtimeScoringBackend");
     const runtimeApiKey = document.getElementById("runtimeApiKey");
-    const saveRuntimeBtn = document.getElementById("saveRuntimeBtn");
     const runtimeNotice = document.getElementById("runtimeNotice");
+    const historyList = document.getElementById("historyList");
+    const questionBankSummary = document.getElementById("questionBankSummary");
+    const questionBankMeta = document.getElementById("questionBankMeta");
+    const questionList = document.getElementById("questionList");
+    const questionDetail = document.getElementById("questionDetail");
+    const chat = document.getElementById("chatShell");
+    const emptyState = document.getElementById("emptyState");
+    const answerBox = document.getElementById("answerBox");
+    const replyBtn = document.getElementById("replyBtn");
+    const finishBtn = document.getElementById("finishBtn");
+    const startBtn = document.getElementById("startBtn");
+    const statusEl = document.getElementById("status");
+    const statusText = document.getElementById("statusText");
+    const reportCard = document.getElementById("reportCard");
+    const interviewTabBtn = document.getElementById("interviewTabBtn");
+    const questionBankTabBtn = document.getElementById("questionBankTabBtn");
+    const interviewTab = document.getElementById("interviewTab");
+    const questionBankTab = document.getElementById("questionBankTab");
+    const resumeFileInput = document.getElementById("resumeFile");
+    const resumeMeta = document.getElementById("resumeMeta");
+    const resumePreview = document.getElementById("resumePreview");
+    const parseResumeBtn = document.getElementById("parseResumeBtn");
 
-    function setBusy(busy, text) {
-      status.classList.toggle("busy", busy);
-      statusText.textContent = text;
+    let activeInterviewId = null;
+    let answeredTurns = 0;
+    let interviewDone = false;
+    let questionBankItems = [];
+    let selectedQuestionId = null;
+    let parsedResume = null;
+
+    function setBusy(busy, message) {
+      statusEl.classList.toggle("busy", busy);
+      statusText.textContent = message;
       startBtn.disabled = busy;
-      restartBtn.disabled = busy;
-      saveRuntimeBtn.disabled = busy;
+      parseResumeBtn.disabled = busy;
       replyBtn.disabled = busy || !activeInterviewId || interviewDone;
       finishBtn.disabled = busy || !activeInterviewId || interviewDone;
     }
 
     function escapeHtml(text) {
-      return String(text)
+      return String(text ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
@@ -744,7 +851,7 @@
     }
 
     function translateScoringBackend(backend) {
-      if (backend === "provider") return "provider（现有适配层）";
+      if (backend === "provider") return "provider";
       if (backend === "pydanticai") return "pydanticai";
       return backend || "未知";
     }
@@ -761,10 +868,45 @@
       return "mock-interviewer-v1";
     }
 
+    function switchTab(name) {
+      const interviewActive = name === "interview";
+      interviewTabBtn.classList.toggle("active", interviewActive);
+      questionBankTabBtn.classList.toggle("active", !interviewActive);
+      interviewTab.classList.toggle("active", interviewActive);
+      questionBankTab.classList.toggle("active", !interviewActive);
+    }
+
+    function buildKnowledgeRefs(refs) {
+      if (!refs.length) return "";
+      const items = refs.map((ref) => {
+        const inner = `
+          <strong>${escapeHtml(ref.title)}</strong>
+          <span>${escapeHtml(ref.category)} · ${escapeHtml(ref.difficulty)}${ref.source_title ? ` · ${escapeHtml(ref.source_title)}` : ""}</span>
+        `;
+        if (ref.source_url) {
+          return `<a class="ref-chip" href="${escapeHtml(ref.source_url)}" target="_blank" rel="noreferrer">${inner}</a>`;
+        }
+        return `<div class="ref-chip">${inner}</div>`;
+      }).join("");
+      return `<div class="msg-refs"><strong>本轮参考题库</strong><div class="ref-list">${items}</div></div>`;
+    }
+
+    function buildResumeRefs(refs) {
+      if (!refs.length) return "";
+      const items = refs.map((ref) => `
+        <div class="ref-chip">
+          <strong>${escapeHtml(ref.section_title || "简历片段")}</strong>
+          <span>${escapeHtml(ref.excerpt)}</span>
+        </div>
+      `).join("");
+      return `<div class="msg-refs"><strong>本轮参考简历</strong><div class="ref-list">${items}</div></div>`;
+    }
+
     function renderChat(transcript) {
       chat.innerHTML = "";
       if (!transcript.length) {
         emptyState.style.display = "block";
+        chat.appendChild(emptyState);
         return;
       }
 
@@ -775,6 +917,8 @@
         div.innerHTML = `
           <span class="who">${entry.role === "assistant" ? "面试官" : "候选人"}</span>
           <div>${escapeHtml(entry.text)}</div>
+          ${entry.role === "assistant" ? buildResumeRefs(entry.resumeRefs || []) : ""}
+          ${entry.role === "assistant" ? buildKnowledgeRefs(entry.knowledgeRefs || []) : ""}
         `;
         chat.appendChild(div);
       });
@@ -784,7 +928,12 @@
     function buildTranscriptFromDetail(detail) {
       const transcript = [];
       (detail.turns || []).forEach((turn) => {
-        transcript.push({ role: "assistant", text: turn.question_text });
+        transcript.push({
+          role: "assistant",
+          text: turn.question_text,
+          knowledgeRefs: turn.knowledge_refs || [],
+          resumeRefs: turn.resume_refs || [],
+        });
         if (turn.candidate_answer) {
           transcript.push({ role: "user", text: turn.candidate_answer });
         }
@@ -795,7 +944,7 @@
     function clearReport() {
       reportCard.classList.remove("visible");
       document.getElementById("overallScore").textContent = "0";
-      document.getElementById("reportRecommendation").textContent = "";
+      document.getElementById("reportRecommendation").textContent = "录用建议：";
       document.getElementById("dimensionScores").innerHTML = "";
       document.getElementById("strengths").innerHTML = "";
       document.getElementById("weaknesses").innerHTML = "";
@@ -828,15 +977,42 @@
         clearReport();
         return;
       }
-
       reportCard.classList.add("visible");
       document.getElementById("overallScore").textContent = report.overall_score ?? "-";
-      document.getElementById("reportRecommendation").textContent =
-        `录用建议：${report.hire_recommendation || "暂无"}`;
+      document.getElementById("reportRecommendation").textContent = `录用建议：${report.hire_recommendation || "暂无"}`;
       renderDimensions(report.dimension_scores || {});
       renderList("strengths", report.strengths || []);
       renderList("weaknesses", report.weaknesses || []);
       renderList("nextActions", report.next_actions || []);
+    }
+
+    function resetResumeState() {
+      parsedResume = null;
+      resumeMeta.textContent = "当前未附加简历。";
+      resumeMeta.classList.remove("error", "success");
+      resumePreview.style.display = "none";
+      resumePreview.textContent = "";
+      resumeFileInput.value = "";
+    }
+
+    function renderResumeState(detail = null) {
+      if (detail?.has_resume) {
+        resumeMeta.textContent = `已附加简历：${detail.resume_filename || "未命名文件"}`;
+        resumeMeta.classList.add("success");
+        resumeMeta.classList.remove("error");
+        resumePreview.style.display = detail.resume_preview ? "block" : "none";
+        resumePreview.textContent = detail.resume_preview || "";
+        return;
+      }
+      if (!parsedResume) {
+        resetResumeState();
+        return;
+      }
+      resumeMeta.textContent = `已解析简历：${parsedResume.filename} · ${parsedResume.char_count} 字`;
+      resumeMeta.classList.add("success");
+      resumeMeta.classList.remove("error");
+      resumePreview.style.display = "block";
+      resumePreview.textContent = parsedResume.preview;
     }
 
     function resetWorkspace() {
@@ -846,12 +1022,12 @@
       turnValue.textContent = "0";
       chat.innerHTML = "";
       emptyState.style.display = "block";
+      chat.appendChild(emptyState);
       answerBox.value = "";
       clearReport();
       setBusy(false, "准备就绪");
-      replyBtn.disabled = true;
-      finishBtn.disabled = true;
       document.querySelectorAll(".history-item").forEach((item) => item.classList.remove("active"));
+      resetResumeState();
     }
 
     function syncRuntimeForm(config) {
@@ -860,9 +1036,8 @@
       runtimePromptVersion.value = config.prompt_version;
       runtimeScoringBackend.value = config.scoring_backend || "provider";
       runtimeApiKey.value = "";
-      runtimeNotice.textContent = config.api_key_configured
-        ? "当前真实模型 Provider 已配置 API Key。"
-        : "当前 Provider 尚未配置 API Key。";
+      runtimeNotice.textContent = config.api_key_configured ? "当前真实模型 Provider 已配置 API Key。" : "当前 Provider 尚未配置 API Key。";
+      runtimeNotice.classList.remove("error");
     }
 
     function applyRuntimeSummary(config) {
@@ -880,9 +1055,80 @@
       turnValue.textContent = String(answeredTurns);
       renderChat(buildTranscriptFromDetail(detail));
       renderReport(detail.report);
+      renderResumeState(detail);
       setBusy(false, interviewDone ? "已加载完成的面试" : "已加载进行中的面试");
       replyBtn.disabled = interviewDone;
       finishBtn.disabled = interviewDone;
+    }
+
+    function renderQuestionDetail(item) {
+      if (!item) {
+        questionDetail.innerHTML = `<h3>题目详情</h3><div class="empty">选择一条题目后，这里会显示完整内容。</div>`;
+        return;
+      }
+
+      const followups = (item.follow_up_suggestions || []).map((entry) => `<li>${escapeHtml(entry)}</li>`).join("");
+      const tags = (item.tags || []).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
+      questionDetail.innerHTML = `
+        <h3>${escapeHtml(item.title)}</h3>
+        <p class="meta">${escapeHtml(item.category)} · ${escapeHtml(item.difficulty)}</p>
+        <div class="tag-row">${tags || '<span class="meta">暂无标签</span>'}</div>
+        <div class="detail-block">
+          <strong>题目描述</strong>
+          <p>${escapeHtml(item.content)}</p>
+        </div>
+        <div class="detail-block">
+          <strong>标准答案</strong>
+          <p>${escapeHtml(item.standard_answer)}</p>
+        </div>
+        <div class="detail-block">
+          <strong>推荐追问</strong>
+          <ul>${followups || "<li>暂无追问建议</li>"}</ul>
+        </div>
+        <div class="detail-block">
+          <strong>来源</strong>
+          <p>${escapeHtml(item.source_title || "未知来源")}</p>
+          ${item.source_url ? `<p><a href="${escapeHtml(item.source_url)}" target="_blank" rel="noreferrer">打开原始页面</a></p>` : ""}
+        </div>
+      `;
+    }
+
+    function renderQuestionBank(items) {
+      questionBankItems = items;
+      questionCountValue.textContent = String(items.length);
+      questionBankSummary.textContent = items.length ? `当前题库共 ${items.length} 道题。` : "题库还没有题目。";
+      questionBankSummary.classList.remove("error");
+      questionBankMeta.textContent = items.length ? `已加载 ${items.length} 道题，按创建时间倒序展示。` : "题库暂时为空。";
+      questionList.innerHTML = "";
+
+      if (!items.length) {
+        questionList.innerHTML = '<div class="empty">还没有加载到题目。</div>';
+        renderQuestionDetail(null);
+        return;
+      }
+
+      const selected = items.find((item) => item.id === selectedQuestionId) || items[0];
+      selectedQuestionId = selected.id;
+
+      items.forEach((item) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = `question-item ${item.id === selectedQuestionId ? "active" : ""}`;
+        const tags = (item.tags || []).slice(0, 4).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
+        card.innerHTML = `
+          <strong>${escapeHtml(item.title)}</strong>
+          <div class="meta">${escapeHtml(item.category)} · ${escapeHtml(item.difficulty)}</div>
+          <p class="meta">${escapeHtml((item.content || "").slice(0, 110))}${item.content && item.content.length > 110 ? "..." : ""}</p>
+          <div class="tag-row">${tags}</div>
+        `;
+        card.addEventListener("click", () => {
+          selectedQuestionId = item.id;
+          renderQuestionBank(questionBankItems);
+        });
+        questionList.appendChild(card);
+      });
+
+      renderQuestionDetail(selected);
     }
 
     async function requestJSON(url, options = {}) {
@@ -916,6 +1162,7 @@
         promptValue.textContent = "未知";
         scoringBackendValue.textContent = "未知";
         runtimeNotice.textContent = "后端不可用。";
+        runtimeNotice.classList.add("error");
         setBusy(false, "后端不可用");
       }
     }
@@ -923,6 +1170,7 @@
     async function saveRuntimeConfig() {
       setBusy(true, "正在保存运行时配置");
       runtimeNotice.textContent = "";
+      runtimeNotice.classList.remove("error");
       try {
         const payload = {
           provider: runtimeProvider.value,
@@ -931,21 +1179,18 @@
           scoring_backend: runtimeScoringBackend.value,
           api_key: runtimeApiKey.value.trim() || null,
         };
-
         const config = await requestJSON("/api/runtime/llm", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-
         applyRuntimeSummary(config);
         setBusy(false, "运行时配置已更新");
-        runtimeNotice.textContent =
-          `已切换到 ${translateProvider(config.provider)} / ${translateScoringBackend(config.scoring_backend)}。\n` +
-          "后续新创建的面试会使用该配置。";
+        runtimeNotice.textContent = `已切换到 ${translateProvider(config.provider)} / ${translateScoringBackend(config.scoring_backend)}。后续新创建的面试会使用该配置。`;
       } catch (error) {
         setBusy(false, error.message);
         runtimeNotice.textContent = error.message;
+        runtimeNotice.classList.add("error");
       }
     }
 
@@ -966,7 +1211,7 @@
     function renderHistory(items) {
       historyList.innerHTML = "";
       if (!items.length) {
-        historyList.innerHTML = `<div class="history-empty">还没有历史面试记录。</div>`;
+        historyList.innerHTML = '<div class="empty">还没有历史面试记录。</div>';
         return;
       }
 
@@ -978,15 +1223,19 @@
         card.innerHTML = `
           <strong>${escapeHtml(item.target_role)}</strong>
           <div class="meta">${escapeHtml(item.level)} / ${escapeHtml(item.round_type)}</div>
-          <div class="micro">
+          <div class="meta">
             状态：${escapeHtml(translateStatus(item.status))}<br />
             Provider：${escapeHtml(translateProvider(item.provider))}<br />
             Prompt：${escapeHtml(item.prompt_version)}<br />
-            轮数：${escapeHtml(item.answered_turns)}/${escapeHtml(item.max_turns)}
+            轮数：${escapeHtml(item.answered_turns)}/${escapeHtml(item.max_turns)}<br />
+            简历：${item.has_resume ? escapeHtml(item.resume_filename || "已附加") : "未附加"}
             ${item.overall_score !== null && item.overall_score !== undefined ? `<br />总分：${escapeHtml(item.overall_score)}` : ""}
           </div>
         `;
-        card.addEventListener("click", () => loadInterview(item.id));
+        card.addEventListener("click", () => {
+          switchTab("interview");
+          loadInterview(item.id);
+        });
         historyList.appendChild(card);
       });
     }
@@ -996,17 +1245,71 @@
         const items = await requestJSON("/api/interviews");
         renderHistory(items);
       } catch (error) {
-        historyList.innerHTML = `<div class="history-empty">${escapeHtml(error.message)}</div>`;
+        historyList.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
+      }
+    }
+
+    async function loadQuestionBank() {
+      try {
+        const items = await requestJSON("/api/question-bank");
+        renderQuestionBank(items);
+      } catch (error) {
+        questionBankSummary.textContent = error.message;
+        questionBankSummary.classList.add("error");
+        questionList.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
+        renderQuestionDetail(null);
+      }
+    }
+
+    async function parseResume() {
+      const file = resumeFileInput.files?.[0];
+      if (!file) {
+        resumeMeta.textContent = "请先选择一个简历文件。";
+        resumeMeta.classList.add("error");
+        return null;
+      }
+
+      setBusy(true, "正在解析简历");
+      resumeMeta.classList.remove("error", "success");
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await fetch("/api/resume/parse", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.detail || "简历解析失败");
+        }
+        parsedResume = data;
+        renderResumeState();
+        setBusy(false, "简历解析完成");
+        return data;
+      } catch (error) {
+        parsedResume = null;
+        resumeMeta.textContent = error.message;
+        resumeMeta.classList.add("error");
+        resumePreview.style.display = "none";
+        setBusy(false, error.message);
+        return null;
       }
     }
 
     async function startInterview() {
       setBusy(true, "正在创建面试");
       try {
+        if (resumeFileInput.files?.length && !parsedResume) {
+          const parsed = await parseResume();
+          if (!parsed) return;
+        }
+
         const payload = {
           target_role: document.getElementById("target_role").value,
           level: document.getElementById("level").value,
           round_type: document.getElementById("round_type").value,
+          resume_filename: parsedResume?.filename || null,
+          resume_text: parsedResume?.text || null,
         };
 
         const data = await requestJSON("/api/interviews", {
@@ -1015,15 +1318,17 @@
           body: JSON.stringify(payload),
         });
 
-        resetWorkspace();
         activeInterviewId = data.interview_id;
+        answeredTurns = 0;
+        interviewDone = false;
+        turnValue.textContent = "0";
+        clearReport();
+        answerBox.value = "";
+        renderChat([{ role: "assistant", text: data.question, knowledgeRefs: [], resumeRefs: [] }]);
         await loadRuntimeConfig();
-        renderChat([{ role: "assistant", text: data.question }]);
-        setBusy(false, `面试已开始，最多 ${data.max_turns} 轮`);
-        replyBtn.disabled = false;
-        finishBtn.disabled = false;
         await loadHistory();
         await loadInterview(activeInterviewId);
+        setBusy(false, `面试已开始，最多 ${data.max_turns} 轮`);
       } catch (error) {
         setBusy(false, error.message);
         alert(error.message);
@@ -1032,9 +1337,7 @@
 
     async function reply() {
       const answer = answerBox.value.trim();
-      if (!activeInterviewId || !answer || interviewDone) {
-        return;
-      }
+      if (!activeInterviewId || !answer || interviewDone) return;
 
       setBusy(true, "正在生成下一问");
       try {
@@ -1053,15 +1356,11 @@
     }
 
     async function finishInterview() {
-      if (!activeInterviewId || interviewDone) {
-        return;
-      }
+      if (!activeInterviewId || interviewDone) return;
 
       setBusy(true, "正在生成评分报告");
       try {
-        await requestJSON(`/api/interviews/${activeInterviewId}/finish`, {
-          method: "POST",
-        });
+        await requestJSON(`/api/interviews/${activeInterviewId}/finish`, { method: "POST" });
         await loadHistory();
         await loadInterview(activeInterviewId);
       } catch (error) {
@@ -1077,12 +1376,17 @@
       }
     });
 
+    interviewTabBtn.addEventListener("click", () => switchTab("interview"));
+    questionBankTabBtn.addEventListener("click", () => switchTab("question-bank"));
     startBtn.addEventListener("click", startInterview);
-    restartBtn.addEventListener("click", resetWorkspace);
+    parseResumeBtn.addEventListener("click", parseResume);
+    document.getElementById("restartBtn").addEventListener("click", resetWorkspace);
+    document.getElementById("saveRuntimeBtn").addEventListener("click", saveRuntimeConfig);
+    document.getElementById("refreshHistoryBtn").addEventListener("click", loadHistory);
+    document.getElementById("refreshQuestionBankBtn").addEventListener("click", loadQuestionBank);
+    document.getElementById("refreshQuestionBankBtnMain").addEventListener("click", loadQuestionBank);
     replyBtn.addEventListener("click", reply);
     finishBtn.addEventListener("click", finishInterview);
-    saveRuntimeBtn.addEventListener("click", saveRuntimeConfig);
-    document.getElementById("refreshHistoryBtn").addEventListener("click", loadHistory);
 
     answerBox.addEventListener("keydown", (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
@@ -1095,6 +1399,7 @@
     loadHealth();
     loadRuntimeConfig();
     loadHistory();
+    loadQuestionBank();
   </script>
 </body>
 </html>
