@@ -1,17 +1,17 @@
 # Interviewer Agent Skeleton
 
-一个可扩展的 **FastAPI + SQLAlchemy + Provider Adapter** 项目骨架，适合继续开发“互联网大厂面试官 Agent”。
+An extensible **FastAPI + SQLAlchemy + LLM provider adapter** skeleton for building an interview simulation backend.
 
-## 当前特性
+## Current Scope
 
-- 模块化单体结构，便于后续扩展
-- Interview / Turn / Report 三个核心实体
-- Provider 适配层：`mock` / `gemini` / `openai`
-- 默认使用 `mock`，无需 API Key 就能本地跑通
-- SQLite 开箱即用；后续可切 PostgreSQL
-- API 已经按面试主链路拆好
+- Layered application structure that is easy to extend
+- Three core entities: `Interview`, `Turn`, and `Report`
+- Provider adapter layer for `mock`, `gemini`, and `openai`
+- Local development flow that works with `mock` and no API key
+- SQLite by default, with room to move to PostgreSQL later
+- API routes for the core interview lifecycle
 
-## 目录结构
+## Project Structure
 
 ```text
 app/
@@ -57,31 +57,33 @@ app/
     grading_system.txt
     interviewer_system.txt
   main.py
+tests/
+  test_health.py
 ```
 
-## 快速启动
+## Quick Start
 
-### 1. 安装依赖
+### 1. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. 复制环境变量
+### 2. Copy environment variables
 
 ```bash
 cp .env.example .env
 ```
 
-Windows 可以手动复制并改名。
+On Windows, copy the file manually and rename it to `.env`.
 
-### 3. 启动服务
+### 3. Start the server
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-打开：
+Available endpoints:
 
 - `GET /health`
 - `POST /api/interviews`
@@ -90,34 +92,32 @@ uvicorn app.main:app --reload
 - `GET /api/interviews/{id}`
 - `GET /api/interviews/{id}/report`
 
-## 默认运行方式
+## Default Runtime Settings
 
-`.env.example` 默认配置为：
+`.env.example` defaults to:
 
 - `LLM_PROVIDER=mock`
 - `DATABASE_URL=sqlite:///./app.db`
 
-所以即使没有接入 Gemini / OpenAI，也可以直接运行完整链路。
+That means you can run the full API flow locally without a real LLM provider.
 
-## 切换到 Gemini
+## Switch To Gemini
 
-1. 安装依赖（`requirements.txt` 已包含）
-2. 设置：
-   - `LLM_PROVIDER=gemini`
-   - `GEMINI_API_KEY=你的key`
-3. 重启服务
+1. Install the dependencies in `requirements.txt`
+2. Set `LLM_PROVIDER=gemini`
+3. Set `GEMINI_API_KEY=your-key`
+4. Restart the server
 
-## 切换到 OpenAI
+## Switch To OpenAI
 
-1. 设置：
-   - `LLM_PROVIDER=openai`
-   - `OPENAI_API_KEY=你的key`
-2. 重启服务
+1. Set `LLM_PROVIDER=openai`
+2. Set `OPENAI_API_KEY=your-key`
+3. Restart the server
 
-## 建议的下一步
+## Suggested Next Steps
 
-1. 接 PostgreSQL + Alembic
-2. 增加用户体系 / 登录
-3. 接入简历上传与解析
-4. 将 prompt 模板版本化
-5. 增加历史面试列表与成长轨迹页面
+1. Add PostgreSQL and Alembic migrations
+2. Add authentication and user ownership
+3. Add resume upload and resume parsing
+4. Version prompts and evaluation rubrics
+5. Add interview history and report browsing

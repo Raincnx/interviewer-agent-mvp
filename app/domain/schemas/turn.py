@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -10,6 +11,6 @@ class TurnRead(BaseModel):
     turn_index: int
     question_text: str
     question_kind: str
-    followup_reason: str | None = None
-    candidate_answer: str | None = None
+    followup_reason: Optional[str] = None
+    candidate_answer: Optional[str] = None
     created_at: datetime

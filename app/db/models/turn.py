@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import DateTime, ForeignKey, Integer, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -15,8 +16,8 @@ class Turn(Base):
     turn_index: Mapped[int] = mapped_column(Integer)
     question_text: Mapped[str] = mapped_column(Text)
     question_kind: Mapped[str] = mapped_column(default="question")
-    followup_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
-    candidate_answer: Mapped[str | None] = mapped_column(Text, nullable=True)
+    followup_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    candidate_answer: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

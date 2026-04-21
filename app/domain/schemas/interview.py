@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -7,9 +8,9 @@ from app.domain.schemas.turn import TurnRead
 
 
 class InterviewCreateRequest(BaseModel):
-    target_role: str = Field(default="后端开发")
-    level: str = Field(default="校招")
-    round_type: str = Field(default="项目面")
+    target_role: str = Field(default="Backend Engineer")
+    level: str = Field(default="Mid-level")
+    round_type: str = Field(default="Project Deep Dive")
 
 
 class InterviewCreateResponse(BaseModel):
@@ -27,9 +28,9 @@ class ReplyRequest(BaseModel):
 
 class ReplyResponse(BaseModel):
     done: bool
-    question: str | None = None
-    report: ReportRead | None = None
-    remaining_turns: int | None = None
+    question: Optional[str] = None
+    report: Optional[ReportRead] = None
+    remaining_turns: Optional[int] = None
 
 
 class FinishInterviewResponse(BaseModel):
@@ -51,4 +52,4 @@ class InterviewDetailResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     turns: list[TurnRead] = []
-    report: ReportRead | None = None
+    report: Optional[ReportRead] = None

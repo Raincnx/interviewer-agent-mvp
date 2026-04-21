@@ -134,7 +134,7 @@ class InterviewService:
             turn_index=answered_count + 1,
             question_text=next_question,
             question_kind="followup",
-            followup_reason="基于上一轮回答继续追问",
+            followup_reason="Continue probing based on the previous answer.",
         )
         self.db.commit()
 
@@ -175,13 +175,12 @@ class InterviewService:
     def _generate_opening_question(self, payload: InterviewCreateRequest) -> str:
         system_prompt = (self.prompts_dir / "interviewer_system.txt").read_text(encoding="utf-8")
         user_prompt = f"""
-你现在要作为技术面试官开始一场新的面试。
+Start a new interview for the following candidate profile.
+Role: {payload.target_role}
+Level: {payload.level}
+Round type: {payload.round_type}
 
-岗位：{payload.target_role}
-级别：{payload.level}
-轮次：{payload.round_type}
-
-请直接开始第一题，不要寒暄。
+Ask the first interview question only. Do not include a greeting or any explanation.
         """.strip()
         return self.provider.generate_text(system_prompt=system_prompt, user_prompt=user_prompt)
 
@@ -194,14 +193,15 @@ class InterviewService:
     ) -> str:
         system_prompt = (self.prompts_dir / "interviewer_system.txt").read_text(encoding="utf-8")
         user_prompt = f"""
-岗位：{target_role}
-级别：{level}
-轮次：{round_type}
+Role: {target_role}
+Level: {level}
+Round type: {round_type}
 
-下面是当前完整对话：
+Here is the full interview transcript so far:
 {transcript}
 
-请基于候选人刚才的回答继续追问；如果回答已经比较完整，再切到下一题。
+Ask the next interviewer question only. Prefer a follow-up based on the candidate's latest answer.
+If the latest answer is already complete, move to the next relevant question.
         """.strip()
         return self.provider.generate_text(system_prompt=system_prompt, user_prompt=user_prompt)
 
@@ -209,7 +209,7 @@ class InterviewService:
         turns = self.turn_repo.list_by_interview_id(interview_id)
         lines: list[str] = []
         for turn in turns:
-            lines.append(f"面试官: {turn.question_text}")
+            lines.append(f"Interviewer: {turn.question_text}")
             if turn.candidate_answer:
-                lines.append(f"候选人: {turn.candidate_answer}")
+                lines.append(f"Candidate: {turn.candidate_answer}")
         return "\n".join(lines)

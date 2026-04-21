@@ -16,13 +16,12 @@ class ScoringService:
     def generate_report_payload(self, transcript: str, meta: dict[str, str]) -> dict[str, Any]:
         system_prompt = (self.prompts_dir / "grading_system.txt").read_text(encoding="utf-8")
         user_prompt = f"""
-请基于以下完整面试对话输出最终评分结果。
+Generate the final structured interview assessment for this interview.
+Role: {meta["target_role"]}
+Level: {meta["level"]}
+Round type: {meta["round_type"]}
 
-岗位：{meta["target_role"]}
-级别：{meta["level"]}
-轮次：{meta["round_type"]}
-
-完整对话：
+Full transcript:
 {transcript}
         """.strip()
 
@@ -33,12 +32,17 @@ class ScoringService:
                 "dimension_scores": {
                     "type": "object",
                     "properties": {
-                        "基础知识": {"type": "integer"},
-                        "项目深度": {"type": "integer"},
-                        "追问应对": {"type": "integer"},
-                        "表达结构": {"type": "integer"},
+                        "Technical Knowledge": {"type": "integer"},
+                        "Project Depth": {"type": "integer"},
+                        "Follow-up Handling": {"type": "integer"},
+                        "Communication": {"type": "integer"},
                     },
-                    "required": ["基础知识", "项目深度", "追问应对", "表达结构"],
+                    "required": [
+                        "Technical Knowledge",
+                        "Project Depth",
+                        "Follow-up Handling",
+                        "Communication",
+                    ],
                 },
                 "strengths": {"type": "array", "items": {"type": "string"}},
                 "weaknesses": {"type": "array", "items": {"type": "string"}},
