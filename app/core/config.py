@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     llm_model: str = "mock-interviewer-v1"
     prompt_version: str = "v1"
     scoring_backend: str = "provider"
+    firecrawl_api_key: str = ""
 
     gemini_api_key: str = ""
     openai_api_key: str = ""
