@@ -6,12 +6,20 @@ from app.domain.schemas.interview import (
     InterviewCreateRequest,
     InterviewCreateResponse,
     InterviewDetailResponse,
+    InterviewHistoryItem,
     ReplyRequest,
     ReplyResponse,
 )
 from app.domain.services.interview_service import InterviewService
 
 router = APIRouter()
+
+
+@router.get("", response_model=list[InterviewHistoryItem])
+def list_interviews(
+    service: InterviewService = Depends(get_interview_service),
+) -> list[InterviewHistoryItem]:
+    return service.list_interviews()
 
 
 @router.post("", response_model=InterviewCreateResponse)

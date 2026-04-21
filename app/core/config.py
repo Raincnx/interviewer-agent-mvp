@@ -11,6 +11,8 @@ class Settings(BaseSettings):
 
     llm_provider: str = "mock"
     llm_model: str = "mock-interviewer-v1"
+    prompt_version: str = "v1"
+    scoring_backend: str = "provider"
 
     gemini_api_key: str = ""
     openai_api_key: str = ""

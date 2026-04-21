@@ -17,6 +17,7 @@ class Interview(Base):
     status: Mapped[str] = mapped_column(String(32), default="running")
     provider: Mapped[str] = mapped_column(String(32))
     model_name: Mapped[str] = mapped_column(String(128))
+    prompt_version: Mapped[str] = mapped_column(String(64), default="v1")
     max_turns: Mapped[int] = mapped_column(Integer, default=5)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

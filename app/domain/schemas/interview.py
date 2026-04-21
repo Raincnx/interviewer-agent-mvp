@@ -8,9 +8,9 @@ from app.domain.schemas.turn import TurnRead
 
 
 class InterviewCreateRequest(BaseModel):
-    target_role: str = Field(default="Backend Engineer")
-    level: str = Field(default="Mid-level")
-    round_type: str = Field(default="Project Deep Dive")
+    target_role: str = Field(default="后端工程师")
+    level: str = Field(default="中级")
+    round_type: str = Field(default="项目深挖")
 
 
 class InterviewCreateResponse(BaseModel):
@@ -20,6 +20,24 @@ class InterviewCreateResponse(BaseModel):
     max_turns: int
     provider: str
     model_name: str
+    prompt_version: str
+
+
+class InterviewHistoryItem(BaseModel):
+    id: str
+    target_role: str
+    level: str
+    round_type: str
+    status: str
+    provider: str
+    model_name: str
+    prompt_version: str
+    max_turns: int
+    answered_turns: int
+    created_at: datetime
+    updated_at: datetime
+    overall_score: Optional[int] = None
+    hire_recommendation: Optional[str] = None
 
 
 class ReplyRequest(BaseModel):
@@ -48,6 +66,7 @@ class InterviewDetailResponse(BaseModel):
     status: str
     provider: str
     model_name: str
+    prompt_version: str
     max_turns: int
     created_at: datetime
     updated_at: datetime

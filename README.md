@@ -1,123 +1,147 @@
-# Interviewer Agent Skeleton
+# Interviewer Agent MVP
 
-An extensible **FastAPI + SQLAlchemy + LLM provider adapter** skeleton for building an interview simulation backend.
+一个基于 `FastAPI + SQLAlchemy + Agent Runtime` 的面试智能体项目。
 
-## Current Scope
+当前项目已经具备这些核心能力：
 
-- Layered application structure that is easy to extend
-- Three core entities: `Interview`, `Turn`, and `Report`
-- Provider adapter layer for `mock`, `gemini`, and `openai`
-- Local development flow that works with `mock` and no API key
-- SQLite by default, with room to move to PostgreSQL later
-- API routes for the core interview lifecycle
+- 创建一场面试
+- 连续完成 5 轮问答
+- 所有轮次入库
+- 生成结构化评分报告
+- 查看历史面试
+- 在 `mock / Gemini / OpenAI` 间切换 provider
+- 对 prompt 做独立版本化
+- 通过 `PydanticAI` 作为可选评分后端
 
-## Project Structure
+## 当前架构
 
 ```text
 app/
-  api/
-    deps.py
-    router.py
-    routes/
-      health.py
-      interviews.py
-      reports.py
-  core/
-    config.py
-    lifespan.py
-    logging.py
-  db/
-    base.py
-    session.py
-    models/
-      interview.py
-      report.py
-      turn.py
-  domain/
-    schemas/
-      interview.py
-      report.py
-      turn.py
-    services/
-      interview_service.py
-      report_service.py
-      scoring_service.py
+  agent/                  # interviewer agent 核心：state / policies / tools / loop
+  api/                    # FastAPI 路由
+  core/                   # 配置、prompt、runtime settings、lifespan
+  db/                     # SQLAlchemy session 与 ORM 模型
+  domain/                 # schemas / services
   infra/
-    llm/
-      base.py
-      gemini_provider.py
-      mock_provider.py
-      openai_provider.py
-      registry.py
-    repositories/
-      interview_repo.py
-      report_repo.py
-      turn_repo.py
-  prompts/
-    grading_system.txt
-    interviewer_system.txt
+    llm/                  # mock / gemini / openai provider adapter
+    repositories/         # repository 层
+    scoring/              # PydanticAI 等评分后端
+  prompts/versions/       # prompt 版本目录
   main.py
+templates/
+  index.html              # 前端工作台
 tests/
-  test_health.py
 ```
 
-## Quick Start
+## Python 版本
 
-### 1. Install dependencies
+项目现在以 `Python 3.11` 为主开发版本。
 
-```bash
-pip install -r requirements.txt
+- `Python 3.9` 还能跑现有基础链路
+- 但 `PydanticAI` 官方要求 `Python 3.10+`
+- 因此如果要启用 `SCORING_BACKEND=pydanticai`，请使用 `Python 3.11`
+
+## 快速开始（Windows / PowerShell）
+
+### 1. 创建虚拟环境
+
+```powershell
+py -3.11 -m venv .venv
 ```
 
-### 2. Copy environment variables
+### 2. 安装依赖
 
-```bash
-cp .env.example .env
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-On Windows, copy the file manually and rename it to `.env`.
+### 3. 准备环境变量
 
-### 3. Start the server
-
-```bash
-uvicorn app.main:app --reload
+```powershell
+Copy-Item .env.example .env
 ```
 
-Available endpoints:
+### 4. 启动服务
 
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
+```
+
+打开：
+
+- [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+## 默认本地模式
+
+`.env.example` 默认配置为：
+
+```env
+LLM_PROVIDER=mock
+LLM_MODEL=mock-interviewer-v1
+PROMPT_VERSION=v1
+SCORING_BACKEND=provider
+DATABASE_URL=sqlite:///./app.db
+MAX_TURNS=5
+```
+
+这意味着：
+
+- 不需要真实模型也能跑完整面试流程
+- 默认评分走现有 provider adapter
+
+## 启用 PydanticAI 评分
+
+如果你已经切到 Python 3.11，可以把评分后端切到 `PydanticAI`。
+
+### 本地可验证路径
+
+```env
+LLM_PROVIDER=mock
+SCORING_BACKEND=pydanticai
+```
+
+这会使用 `PydanticAI + FunctionModel` 跑一条真实的 PydanticAI 本地评分链路，不依赖外部 API key。
+
+### OpenAI 路径
+
+```env
+LLM_PROVIDER=openai
+LLM_MODEL=gpt-4.1-mini
+OPENAI_API_KEY=your-key
+SCORING_BACKEND=pydanticai
+```
+
+### Gemini 路径
+
+```env
+LLM_PROVIDER=gemini
+LLM_MODEL=gemini-2.5-flash
+GEMINI_API_KEY=your-key
+SCORING_BACKEND=pydanticai
+```
+
+## 运行测试
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
+```
+
+## 当前主要接口
+
+- `GET /`
 - `GET /health`
+- `GET /api/runtime/llm`
+- `PUT /api/runtime/llm`
+- `GET /api/interviews`
 - `POST /api/interviews`
 - `POST /api/interviews/{id}/reply`
 - `POST /api/interviews/{id}/finish`
 - `GET /api/interviews/{id}`
 - `GET /api/interviews/{id}/report`
 
-## Default Runtime Settings
+## 下一步建议
 
-`.env.example` defaults to:
-
-- `LLM_PROVIDER=mock`
-- `DATABASE_URL=sqlite:///./app.db`
-
-That means you can run the full API flow locally without a real LLM provider.
-
-## Switch To Gemini
-
-1. Install the dependencies in `requirements.txt`
-2. Set `LLM_PROVIDER=gemini`
-3. Set `GEMINI_API_KEY=your-key`
-4. Restart the server
-
-## Switch To OpenAI
-
-1. Set `LLM_PROVIDER=openai`
-2. Set `OPENAI_API_KEY=your-key`
-3. Restart the server
-
-## Suggested Next Steps
-
-1. Add PostgreSQL and Alembic migrations
-2. Add authentication and user ownership
-3. Add resume upload and resume parsing
-4. Version prompts and evaluation rubrics
-5. Add interview history and report browsing
+1. 把 `scoring_backend` 接到前端运行时配置面板
+2. 为 Agent 增加 tool trace / run trace
+3. 增加 Alembic migration，替代运行时补列
+4. 把 prompt 管理升级成可比较、可回滚的版本体系

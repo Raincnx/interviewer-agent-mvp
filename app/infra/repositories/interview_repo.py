@@ -17,6 +17,7 @@ class InterviewRepository:
         status: str,
         provider: str,
         model_name: str,
+        prompt_version: str,
         max_turns: int,
     ) -> Interview:
         interview = Interview(
@@ -26,6 +27,7 @@ class InterviewRepository:
             status=status,
             provider=provider,
             model_name=model_name,
+            prompt_version=prompt_version,
             max_turns=max_turns,
         )
         self.db.add(interview)
@@ -38,6 +40,14 @@ class InterviewRepository:
             .options(selectinload(Interview.turns), selectinload(Interview.report))
             .filter(Interview.id == interview_id)
             .first()
+        )
+
+    def list_all(self) -> list[Interview]:
+        return (
+            self.db.query(Interview)
+            .options(selectinload(Interview.turns), selectinload(Interview.report))
+            .order_by(Interview.created_at.desc())
+            .all()
         )
 
     def update_status(self, interview: Interview, status: str) -> Interview:
