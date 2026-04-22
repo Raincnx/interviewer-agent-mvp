@@ -19,7 +19,7 @@ from app.domain.schemas.question_bank import (
     QuestionSourceRead,
     RawQuestionDocumentRead,
 )
-from app.domain.services.question_bank_catalog import DEFAULT_AGENT_SOURCE_CATALOG
+from app.domain.services.question_bank_catalog import iter_source_catalog
 from app.infra.question_bank.crawler import build_question_crawler
 from app.infra.question_bank.extractor import QuestionCollectorExtractor
 from app.infra.repositories.question_bank_repo import QuestionBankRepository
@@ -189,13 +189,13 @@ class QuestionBankService:
         self.db.commit()
         return QuestionSourceRead.model_validate(source)
 
-    def bootstrap_default_sources(self) -> QuestionSourceBootstrapResponse:
+    def bootstrap_default_sources(self, job_tracks: list[str] | None = None) -> QuestionSourceBootstrapResponse:
         existing_sources = {source.base_url: source for source in self.repo.list_sources() if source.base_url}
         created_count = 0
         updated_count = 0
         sources: list[QuestionSourceRead] = []
 
-        for item in DEFAULT_AGENT_SOURCE_CATALOG:
+        for item in iter_source_catalog(job_tracks):
             base_url = str(item.get("base_url") or "")
             existed = existing_sources.get(base_url)
             source = self.repo.get_or_create_source(
@@ -231,8 +231,15 @@ class QuestionBankService:
     def list_raw_documents(self) -> list[RawQuestionDocumentRead]:
         return [RawQuestionDocumentRead.model_validate(item) for item in self.repo.list_raw_documents()]
 
-    def collect_enabled_sources(self) -> QuestionBatchCollectResponse:
+    def collect_enabled_sources(self, job_tracks: list[str] | None = None) -> QuestionBatchCollectResponse:
+        normalized_tracks = {item.strip().lower() for item in (job_tracks or []) if item.strip()}
         sources = [item for item in self.repo.list_sources() if item.enabled]
+        if normalized_tracks:
+            sources = [
+                item
+                for item in sources
+                if normalized_tracks.intersection(self._extract_job_tracks_from_source(item))
+            ]
         results: list[QuestionCollectResponse] = []
         errors: list[str] = []
         inserted_count = 0
@@ -314,6 +321,18 @@ class QuestionBankService:
             enabled=True,
             config_json=json.dumps({"request_url": source_url, "use_firecrawl": use_firecrawl}, ensure_ascii=False),
         )
+
+    @staticmethod
+    def _extract_job_tracks_from_source(source) -> set[str]:
+        try:
+            config = json.loads(source.config_json or "{}")
+        except json.JSONDecodeError:
+            return set()
+
+        tracks = config.get("job_tracks") or []
+        if not isinstance(tracks, list):
+            return set()
+        return {str(item).strip().lower() for item in tracks if str(item).strip()}
 
     def _persist_raw_document(
         self,

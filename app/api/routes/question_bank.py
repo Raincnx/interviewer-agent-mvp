@@ -41,9 +41,10 @@ def create_source(
 
 @router.post("/sources/bootstrap", response_model=QuestionSourceBootstrapResponse)
 def bootstrap_sources(
+    job_track: list[str] | None = None,
     service: QuestionBankService = Depends(get_question_bank_service),
 ) -> QuestionSourceBootstrapResponse:
-    return service.bootstrap_default_sources()
+    return service.bootstrap_default_sources(job_track)
 
 
 @router.get("/jobs", response_model=list[QuestionCollectionJobRead])
@@ -73,9 +74,10 @@ def collect_questions(
 
 @router.post("/collect/enabled", response_model=QuestionBatchCollectResponse)
 def collect_enabled_sources(
+    job_track: list[str] | None = None,
     service: QuestionBankService = Depends(get_question_bank_service),
 ) -> QuestionBatchCollectResponse:
-    return service.collect_enabled_sources()
+    return service.collect_enabled_sources(job_track)
 
 
 @router.get("/{item_id}", response_model=QuestionBankItemRead)

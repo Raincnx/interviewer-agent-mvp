@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -30,12 +31,24 @@ def build_session(settings: Settings) -> Session:
     return session_local()
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="批量采集已启用的题库来源。")
+    parser.add_argument(
+        "--job-track",
+        action="append",
+        dest="job_tracks",
+        help="按岗位方向筛选来源，可重复传入，如 ai-agent / backend / ml-engineer。",
+    )
+    return parser.parse_args()
+
+
 def main() -> int:
+    args = parse_args()
     settings = Settings()
     db = build_session(settings)
     try:
         service = QuestionBankService(db=db, settings=settings, repo=QuestionBankRepository(db))
-        result = service.collect_enabled_sources()
+        result = service.collect_enabled_sources(args.job_tracks)
         print(f"注册来源数: {result.source_count}")
         print(f"成功采集: {result.success_count}")
         print(f"失败采集: {result.failure_count}")
