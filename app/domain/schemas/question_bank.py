@@ -129,3 +129,20 @@ class QuestionCollectResponse(BaseModel):
     skipped_count: int
     versioned_count: int
     questions: list[QuestionBankItemRead]
+
+
+class QuestionSourceBootstrapResponse(BaseModel):
+    created_count: int
+    updated_count: int
+    sources: list[QuestionSourceRead]
+
+
+class QuestionBatchCollectResponse(BaseModel):
+    source_count: int
+    success_count: int
+    failure_count: int
+    inserted_count: int
+    skipped_count: int
+    versioned_count: int
+    results: list[QuestionCollectResponse] = Field(default_factory=list)
+    errors: list[str] = Field(default_factory=list)

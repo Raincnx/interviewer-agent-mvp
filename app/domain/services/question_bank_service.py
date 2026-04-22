@@ -10,13 +10,16 @@ from app.core.config import Settings
 from app.domain.schemas.question_bank import (
     InterviewQuestion,
     QuestionBankItemRead,
+    QuestionBatchCollectResponse,
     QuestionCollectRequest,
     QuestionCollectResponse,
     QuestionCollectionJobRead,
+    QuestionSourceBootstrapResponse,
     QuestionSourceCreateRequest,
     QuestionSourceRead,
     RawQuestionDocumentRead,
 )
+from app.domain.services.question_bank_catalog import DEFAULT_AGENT_SOURCE_CATALOG
 from app.infra.question_bank.crawler import build_question_crawler
 from app.infra.question_bank.extractor import QuestionCollectorExtractor
 from app.infra.repositories.question_bank_repo import QuestionBankRepository
@@ -60,7 +63,11 @@ class QuestionBankService:
                 source_title = payload.source_title or document.source_title
 
             if source_url and source is None:
-                source = self._create_source_from_url(source_url=source_url, source_title=source_title, use_firecrawl=payload.use_firecrawl)
+                source = self._create_source_from_url(
+                    source_url=source_url,
+                    source_title=source_title,
+                    use_firecrawl=payload.use_firecrawl,
+                )
                 job.source_id = source.id
                 self.db.add(job)
                 self.db.flush()
@@ -182,6 +189,39 @@ class QuestionBankService:
         self.db.commit()
         return QuestionSourceRead.model_validate(source)
 
+    def bootstrap_default_sources(self) -> QuestionSourceBootstrapResponse:
+        existing_sources = {source.base_url: source for source in self.repo.list_sources() if source.base_url}
+        created_count = 0
+        updated_count = 0
+        sources: list[QuestionSourceRead] = []
+
+        for item in DEFAULT_AGENT_SOURCE_CATALOG:
+            base_url = str(item.get("base_url") or "")
+            existed = existing_sources.get(base_url)
+            source = self.repo.get_or_create_source(
+                name=str(item["name"]),
+                source_type=str(item.get("source_type", "web")),
+                base_url=base_url or None,
+                language=str(item.get("language", "zh-CN")),
+                crawl_strategy=str(item.get("crawl_strategy", "http")),
+                enabled=True,
+                config_json=json.dumps(item.get("config", {}), ensure_ascii=False),
+            )
+            if existed is None:
+                created_count += 1
+                if base_url:
+                    existing_sources[base_url] = source
+            else:
+                updated_count += 1
+            sources.append(QuestionSourceRead.model_validate(source))
+
+        self.db.commit()
+        return QuestionSourceBootstrapResponse(
+            created_count=created_count,
+            updated_count=updated_count,
+            sources=sources,
+        )
+
     def list_sources(self) -> list[QuestionSourceRead]:
         return [QuestionSourceRead.model_validate(item) for item in self.repo.list_sources()]
 
@@ -190,6 +230,48 @@ class QuestionBankService:
 
     def list_raw_documents(self) -> list[RawQuestionDocumentRead]:
         return [RawQuestionDocumentRead.model_validate(item) for item in self.repo.list_raw_documents()]
+
+    def collect_enabled_sources(self) -> QuestionBatchCollectResponse:
+        sources = [item for item in self.repo.list_sources() if item.enabled]
+        results: list[QuestionCollectResponse] = []
+        errors: list[str] = []
+        inserted_count = 0
+        skipped_count = 0
+        versioned_count = 0
+
+        for source in sources:
+            config = json.loads(source.config_json or "{}")
+            request_url = config.get("request_url") or source.base_url
+            if not request_url:
+                errors.append(f"{source.name}: 缺少 request_url")
+                continue
+            try:
+                result = self.collect(
+                    QuestionCollectRequest(
+                        source_url=str(request_url),
+                        source_title=source.name,
+                        category_hint=config.get("category_hint"),
+                        max_questions=int(config.get("max_questions", 20)),
+                        use_firecrawl=bool(config.get("use_firecrawl", False)),
+                    )
+                )
+                results.append(result)
+                inserted_count += result.inserted_count
+                skipped_count += result.skipped_count
+                versioned_count += result.versioned_count
+            except Exception as exc:
+                errors.append(f"{source.name}: {exc}")
+
+        return QuestionBatchCollectResponse(
+            source_count=len(sources),
+            success_count=len(results),
+            failure_count=len(errors),
+            inserted_count=inserted_count,
+            skipped_count=skipped_count,
+            versioned_count=versioned_count,
+            results=results,
+            errors=errors,
+        )
 
     def list_questions(self) -> list[QuestionBankItemRead]:
         return [self.to_read_model(item) for item in self.repo.list_all()]
@@ -221,17 +303,16 @@ class QuestionBankService:
 
     def _create_source_from_url(self, *, source_url: str, source_title: str | None, use_firecrawl: bool):
         parsed = urlparse(source_url)
-        base_url = f"{parsed.scheme}://{parsed.netloc}" if parsed.scheme and parsed.netloc else source_url
         crawl_strategy = "firecrawl" if use_firecrawl else "http"
         name = source_title or parsed.netloc or source_url
         return self.repo.get_or_create_source(
             name=name,
             source_type="web",
-            base_url=base_url,
+            base_url=source_url,
             language="zh-CN",
             crawl_strategy=crawl_strategy,
             enabled=True,
-            config_json=None,
+            config_json=json.dumps({"request_url": source_url, "use_firecrawl": use_firecrawl}, ensure_ascii=False),
         )
 
     def _persist_raw_document(

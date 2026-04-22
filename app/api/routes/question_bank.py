@@ -3,9 +3,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.api.deps import get_question_bank_service
 from app.domain.schemas.question_bank import (
     QuestionBankItemRead,
+    QuestionBatchCollectResponse,
     QuestionCollectRequest,
     QuestionCollectResponse,
     QuestionCollectionJobRead,
+    QuestionSourceBootstrapResponse,
     QuestionSourceCreateRequest,
     QuestionSourceRead,
     RawQuestionDocumentRead,
@@ -37,6 +39,13 @@ def create_source(
     return service.create_source(payload)
 
 
+@router.post("/sources/bootstrap", response_model=QuestionSourceBootstrapResponse)
+def bootstrap_sources(
+    service: QuestionBankService = Depends(get_question_bank_service),
+) -> QuestionSourceBootstrapResponse:
+    return service.bootstrap_default_sources()
+
+
 @router.get("/jobs", response_model=list[QuestionCollectionJobRead])
 def list_jobs(
     service: QuestionBankService = Depends(get_question_bank_service),
@@ -60,6 +69,13 @@ def collect_questions(
         return service.collect(payload)
     except RuntimeError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.post("/collect/enabled", response_model=QuestionBatchCollectResponse)
+def collect_enabled_sources(
+    service: QuestionBankService = Depends(get_question_bank_service),
+) -> QuestionBatchCollectResponse:
+    return service.collect_enabled_sources()
 
 
 @router.get("/{item_id}", response_model=QuestionBankItemRead)

@@ -200,3 +200,16 @@ def test_collect_question_bank_versions_question_when_content_changes(client: Te
     documents = document_response.json()
     assert len(documents) == 2
     assert documents[0]["document_version"] == 2
+
+
+def test_bootstrap_and_collect_enabled_sources_endpoints(client: TestClient) -> None:
+    bootstrap_response = client.post("/api/question-bank/sources/bootstrap")
+    assert bootstrap_response.status_code == 200
+    bootstrap_payload = bootstrap_response.json()
+    assert bootstrap_payload["created_count"] >= 1
+
+    collect_response = client.post("/api/question-bank/collect/enabled")
+    assert collect_response.status_code == 200
+    collect_payload = collect_response.json()
+    assert collect_payload["source_count"] >= 1
+    assert collect_payload["success_count"] >= 1
