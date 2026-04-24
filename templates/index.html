@@ -240,6 +240,7 @@
       min-height: 960px;
       display: flex;
       flex-direction: column;
+      overflow: visible;
     }
 
     .workspace-head {
@@ -472,7 +473,6 @@
       color: var(--accent-strong);
       line-height: 1;
     }
-
     .report-grid,
     .question-bank-layout {
       display: grid;
@@ -480,11 +480,39 @@
       gap: 16px;
     }
 
+    .question-bank-layout {
+      grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+      align-items: start;
+      min-height: 72vh;
+    }
+
     .report-block {
       padding: 16px 18px;
       border-radius: 18px;
       border: 1px solid var(--line);
       background: rgba(249, 243, 233, 0.82);
+    }
+
+    .question-list-panel,
+    .question-detail {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      padding: 18px;
+      position: sticky;
+      top: 24px;
+      max-height: calc(100vh - 72px);
+      overflow: hidden;
+    }
+
+    .question-list-panel {
+      gap: 14px;
+    }
+
+    .question-detail {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.72)),
+        radial-gradient(circle at top right, rgba(180, 90, 48, 0.08), transparent 32%);
     }
 
     .report-block h3,
@@ -495,6 +523,179 @@
       font-size: 14px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
+    }
+
+    .question-bank-toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(140px, 0.7fr)) auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .question-bank-toolbar .secondary {
+      width: auto;
+      white-space: nowrap;
+    }
+
+    .question-bank-caption {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .question-bank-caption strong {
+      color: var(--accent-strong);
+      font-size: 16px;
+    }
+
+    .question-bank-caption-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .question-pagination {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .question-pagination .secondary {
+      width: auto;
+      min-width: 0;
+      padding: 10px 14px;
+    }
+
+    .question-page-info {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .question-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 0;
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding-right: 4px;
+      scroll-behavior: smooth;
+    }
+
+    .question-item {
+      position: relative;
+      text-align: left;
+      padding: 16px;
+      border: 1px solid rgba(92, 64, 39, 0.12);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.86);
+    }
+
+    .question-item:hover {
+      border-color: rgba(180, 90, 48, 0.22);
+      background: rgba(255, 248, 241, 0.95);
+    }
+
+    .question-item.active {
+      background: linear-gradient(180deg, rgba(250, 233, 221, 0.92), rgba(255, 247, 241, 0.96));
+      border-color: rgba(180, 90, 48, 0.34);
+      box-shadow: 0 14px 32px rgba(180, 90, 48, 0.12);
+    }
+
+    .question-item p {
+      margin: 8px 0 0;
+      line-height: 1.7;
+    }
+
+    .question-item-index {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 30px;
+      height: 30px;
+      margin-bottom: 10px;
+      border-radius: 999px;
+      background: rgba(180, 90, 48, 0.12);
+      color: var(--accent-strong);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .question-item-footer,
+    .question-detail-meta,
+    .question-detail-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .question-item-footer {
+      justify-content: space-between;
+      margin-top: 12px;
+    }
+
+    .question-detail-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .question-detail-body {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding-right: 4px;
+      scroll-behavior: smooth;
+    }
+
+    .question-detail-body p {
+      margin: 8px 0 0;
+      line-height: 1.85;
+    }
+
+    .question-detail-actions {
+      justify-content: space-between;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px dashed rgba(92, 64, 39, 0.14);
+    }
+
+    .question-nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .question-nav button,
+    .detail-link {
+      width: auto;
+      min-width: 0;
+    }
+
+    .detail-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 16px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.86);
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .detail-link:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(88, 59, 34, 0.12);
     }
 
     .dimension-list {
@@ -543,13 +744,25 @@
       .stats,
       .report-grid,
       .question-bank-layout,
-      .profile-grid {
+      .profile-grid,
+      .question-bank-toolbar {
         grid-template-columns: 1fr;
       }
 
       .status {
         width: 100%;
         margin-left: 0;
+      }
+
+      .question-detail {
+        order: -1;
+        position: static;
+        max-height: none;
+      }
+
+      .question-list-panel {
+        position: static;
+        max-height: none;
       }
     }
   </style>
@@ -731,22 +944,61 @@
         <div class="toolbar" style="margin-bottom: 16px;">
           <div>
             <h3>题库浏览</h3>
-            <p class="section-note">这里既可以作为 Agent 的知识库，也可以直接拿来复习知识点。</p>
+            <p class="section-note">这里既可以作为 Agent 的知识库，也可以直接拿来复习知识点。现在支持搜索、筛选和沉浸式详情阅读。</p>
           </div>
           <button id="refreshQuestionBankBtnMain" class="secondary" type="button">刷新题库</button>
         </div>
 
+        <div class="question-bank-toolbar" style="margin-bottom: 16px;">
+          <div>
+            <label for="questionSearchInput">搜索题目 / 标签 / 关键词</label>
+            <input id="questionSearchInput" type="text" placeholder="例如：Redis、MCP、RAG、系统设计" />
+          </div>
+          <div>
+            <label for="questionCategoryFilter">分类筛选</label>
+            <select id="questionCategoryFilter">
+              <option value="all">全部分类</option>
+            </select>
+          </div>
+          <div>
+            <label for="questionDifficultyFilter">难度筛选</label>
+            <select id="questionDifficultyFilter">
+              <option value="all">全部难度</option>
+            </select>
+          </div>
+          <button id="clearQuestionFiltersBtn" class="secondary" type="button">清空筛选</button>
+        </div>
+
         <div class="question-bank-layout">
           <div class="question-list-panel">
-            <h3>题目列表</h3>
-            <div id="questionBankMeta" class="meta">题库尚未加载。</div>
-            <div id="questionList" class="question-list" style="margin-top: 12px;">
+            <div class="question-bank-caption">
+              <div>
+                <div class="question-bank-caption-main">
+                  <h3>题目列表</h3>
+                  <strong id="questionResultCount">0 题</strong>
+                </div>
+                <div id="questionBankMeta" class="meta">题库尚未加载。</div>
+              </div>
+              <div class="question-pagination">
+                <button id="questionPrevPageBtn" class="secondary" type="button">上一页</button>
+                <span id="questionPageInfo" class="question-page-info">第 1 / 1 页</span>
+                <button id="questionNextPageBtn" class="secondary" type="button">下一页</button>
+              </div>
+            </div>
+            <div id="questionList" class="question-list">
               <div class="empty">还没有加载到题目。</div>
             </div>
           </div>
           <div id="questionDetail" class="question-detail">
-            <h3>题目详情</h3>
-            <div class="empty">选择一条题目后，这里会显示完整内容。</div>
+            <div class="question-detail-head">
+              <div>
+                <h3>题目详情</h3>
+                <div id="questionDetailPosition" class="meta">选择题目后可开始沉浸式阅读。</div>
+              </div>
+            </div>
+            <div id="questionDetailBody" class="question-detail-body">
+              <div class="empty">选择一条题目后，这里会显示完整内容。</div>
+            </div>
           </div>
         </div>
       </section>
@@ -769,6 +1021,16 @@
     const historyList = document.getElementById("historyList");
     const questionBankSummary = document.getElementById("questionBankSummary");
     const questionBankMeta = document.getElementById("questionBankMeta");
+    const questionResultCount = document.getElementById("questionResultCount");
+    const questionPrevPageBtn = document.getElementById("questionPrevPageBtn");
+    const questionNextPageBtn = document.getElementById("questionNextPageBtn");
+    const questionPageInfo = document.getElementById("questionPageInfo");
+    const questionSearchInput = document.getElementById("questionSearchInput");
+    const questionCategoryFilter = document.getElementById("questionCategoryFilter");
+    const questionDifficultyFilter = document.getElementById("questionDifficultyFilter");
+    const clearQuestionFiltersBtn = document.getElementById("clearQuestionFiltersBtn");
+    const questionDetailPosition = document.getElementById("questionDetailPosition");
+    const questionDetailBody = document.getElementById("questionDetailBody");
     const questionList = document.getElementById("questionList");
     const questionDetail = document.getElementById("questionDetail");
     const chat = document.getElementById("chatShell");
@@ -796,6 +1058,13 @@
     let questionBankItems = [];
     let selectedQuestionId = null;
     let parsedResume = null;
+    let questionBankPage = 1;
+    const QUESTION_PAGE_SIZE = 4;
+    const questionBankFilters = {
+      search: "",
+      category: "all",
+      difficulty: "all",
+    };
 
     function setBusy(busy, message) {
       statusEl.classList.toggle("busy", busy);
@@ -1078,18 +1347,100 @@
       finishBtn.disabled = interviewDone;
     }
 
-    function renderQuestionDetail(item) {
+    function normalizeQuestionText(value) {
+      return String(value || "").trim().toLowerCase();
+    }
+
+    function buildQuestionSearchText(item) {
+      return normalizeQuestionText([
+        item.title,
+        item.category,
+        item.difficulty,
+        item.content,
+        item.standard_answer,
+        ...(item.tags || []),
+        ...(item.follow_up_suggestions || []),
+        item.source_title,
+      ].join(" "));
+    }
+
+    function syncQuestionFilterOptions(items) {
+      const selectedCategory = questionCategoryFilter.value || questionBankFilters.category;
+      const selectedDifficulty = questionDifficultyFilter.value || questionBankFilters.difficulty;
+      const categories = [...new Set(items.map((item) => item.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, "zh-CN"));
+      const difficulties = [...new Set(items.map((item) => item.difficulty).filter(Boolean))];
+
+      questionCategoryFilter.innerHTML = '<option value="all">全部分类</option>' + categories.map((item) => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join("");
+      questionDifficultyFilter.innerHTML = '<option value="all">全部难度</option>' + difficulties.map((item) => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`).join("");
+
+      questionCategoryFilter.value = categories.includes(selectedCategory) ? selectedCategory : "all";
+      questionDifficultyFilter.value = difficulties.includes(selectedDifficulty) ? selectedDifficulty : "all";
+      questionBankFilters.category = questionCategoryFilter.value;
+      questionBankFilters.difficulty = questionDifficultyFilter.value;
+    }
+
+    function getFilteredQuestionBankItems(items) {
+      const search = normalizeQuestionText(questionBankFilters.search);
+      return items.filter((item) => {
+        const matchSearch = !search || buildQuestionSearchText(item).includes(search);
+        const matchCategory = questionBankFilters.category === "all" || item.category === questionBankFilters.category;
+        const matchDifficulty = questionBankFilters.difficulty === "all" || item.difficulty === questionBankFilters.difficulty;
+        return matchSearch && matchCategory && matchDifficulty;
+      });
+    }
+
+    function getQuestionPageMeta(items) {
+      const totalPages = Math.max(1, Math.ceil(items.length / QUESTION_PAGE_SIZE));
+      questionBankPage = Math.min(Math.max(questionBankPage, 1), totalPages);
+
+      const startIndex = (questionBankPage - 1) * QUESTION_PAGE_SIZE;
+      const endIndex = startIndex + QUESTION_PAGE_SIZE;
+      return {
+        totalPages,
+        startIndex,
+        endIndex,
+        pageItems: items.slice(startIndex, endIndex),
+      };
+    }
+
+    function syncQuestionPagination(currentPage, totalPages) {
+      if (!questionPageInfo || !questionPrevPageBtn || !questionNextPageBtn) return;
+      questionPageInfo.textContent = `第 ${currentPage} / ${totalPages} 页`;
+      questionPrevPageBtn.disabled = currentPage <= 1;
+      questionNextPageBtn.disabled = currentPage >= totalPages;
+    }
+
+    function resetQuestionPageView() {
+      if (questionList) questionList.scrollTop = 0;
+      if (questionDetailBody) questionDetailBody.scrollTop = 0;
+    }
+
+    function renderQuestionDetail(item, visibleItems = []) {
       if (!item) {
-        questionDetail.innerHTML = `<h3>题目详情</h3><div class="empty">选择一条题目后，这里会显示完整内容。</div>`;
+        questionDetailPosition.textContent = visibleItems.length ? `当前筛选下共有 ${visibleItems.length} 题。` : "选择题目后可开始沉浸式阅读。";
+        questionDetailBody.innerHTML = '<div class="empty">选择一条题目后，这里会显示完整内容。</div>';
         return;
       }
 
+      const currentIndex = visibleItems.findIndex((entry) => entry.id === item.id);
+      const previousItem = currentIndex > 0 ? visibleItems[currentIndex - 1] : null;
+      const nextItem = currentIndex >= 0 && currentIndex < visibleItems.length - 1 ? visibleItems[currentIndex + 1] : null;
       const followups = (item.follow_up_suggestions || []).map((entry) => `<li>${escapeHtml(entry)}</li>`).join("");
       const tags = (item.tags || []).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
-      questionDetail.innerHTML = `
-        <h3>${escapeHtml(item.title)}</h3>
-        <p class="meta">${escapeHtml(item.category)} · ${escapeHtml(item.difficulty)}</p>
-        <div class="tag-row">${tags || '<span class="meta">暂无标签</span>'}</div>
+
+      questionDetailPosition.textContent = currentIndex >= 0
+        ? `第 ${currentIndex + 1} / ${visibleItems.length} 题`
+        : "题目详情";
+      questionDetailBody.scrollTop = 0;
+      questionDetailBody.innerHTML = `
+        <h2 style="margin: 0 0 8px; font-size: 28px; line-height: 1.35;">${escapeHtml(item.title)}</h2>
+        <div class="question-detail-meta">
+          <span class="pill">${escapeHtml(item.category)}</span>
+          <span class="pill">${escapeHtml(item.difficulty)}</span>
+          ${item.occurrence_count ? `<span class="pill">出现 ${escapeHtml(item.occurrence_count)} 次</span>` : ""}
+          ${item.version ? `<span class="pill">版本 v${escapeHtml(item.version)}</span>` : ""}
+        </div>
+        <div class="tag-row" style="margin-top: 12px;">${tags || '<span class="meta">暂无标签</span>'}</div>
         <div class="detail-block">
           <strong>题目描述</strong>
           <p>${escapeHtml(item.content)}</p>
@@ -1100,52 +1451,106 @@
         </div>
         <div class="detail-block">
           <strong>推荐追问</strong>
-          <ul>${followups || "<li>暂无追问建议</li>"}</ul>
+          <ul>${followups || '<li>暂无追问建议</li>'}</ul>
         </div>
         <div class="detail-block">
-          <strong>来源</strong>
+          <strong>来源信息</strong>
           <p>${escapeHtml(item.source_title || "未知来源")}</p>
-          ${item.source_url ? `<p><a href="${escapeHtml(item.source_url)}" target="_blank" rel="noreferrer">打开原始页面</a></p>` : ""}
+          <p class="meta">分类：${escapeHtml(item.category)} · 难度：${escapeHtml(item.difficulty)}</p>
+        </div>
+        <div class="question-detail-actions">
+          <div class="question-nav">
+            <button type="button" class="secondary" id="questionPrevBtn" ${previousItem ? "" : "disabled"}>上一题</button>
+            <button type="button" class="secondary" id="questionNextBtn" ${nextItem ? "" : "disabled"}>下一题</button>
+          </div>
+          ${item.source_url ? `<a class="detail-link" href="${escapeHtml(item.source_url)}" target="_blank" rel="noreferrer">查看原始来源</a>` : '<span class="meta">当前题目暂无原始来源链接</span>'}
         </div>
       `;
+
+      const previousBtn = document.getElementById("questionPrevBtn");
+      const nextBtn = document.getElementById("questionNextBtn");
+      if (previousBtn && previousItem) {
+        previousBtn.addEventListener("click", () => {
+          const previousIndex = visibleItems.findIndex((entry) => entry.id === previousItem.id);
+          questionBankPage = Math.floor(previousIndex / QUESTION_PAGE_SIZE) + 1;
+          selectedQuestionId = previousItem.id;
+          renderQuestionBank(questionBankItems);
+        });
+      }
+      if (nextBtn && nextItem) {
+        nextBtn.addEventListener("click", () => {
+          const nextIndex = visibleItems.findIndex((entry) => entry.id === nextItem.id);
+          questionBankPage = Math.floor(nextIndex / QUESTION_PAGE_SIZE) + 1;
+          selectedQuestionId = nextItem.id;
+          renderQuestionBank(questionBankItems);
+        });
+      }
     }
 
     function renderQuestionBank(items) {
       questionBankItems = items;
+      syncQuestionFilterOptions(items);
+      const visibleItems = getFilteredQuestionBankItems(items);
+      const summarySuffix = questionBankFilters.search ? `，搜索“${questionBankFilters.search}”` : "";
+
       questionCountValue.textContent = String(items.length);
-      questionBankSummary.textContent = items.length ? `当前题库共 ${items.length} 道题。` : "题库还没有题目。";
+      questionResultCount.textContent = `${visibleItems.length} 题`;
+      questionBankSummary.textContent = items.length
+        ? `当前题库共 ${items.length} 道题，其中 ${visibleItems.length} 道符合当前筛选。`
+        : "题库还没有题目。";
       questionBankSummary.classList.remove("error");
-      questionBankMeta.textContent = items.length ? `已加载 ${items.length} 道题，按创建时间倒序展示。` : "题库暂时为空。";
       questionList.innerHTML = "";
 
-      if (!items.length) {
-        questionList.innerHTML = '<div class="empty">还没有加载到题目。</div>';
-        renderQuestionDetail(null);
+      if (!visibleItems.length) {
+        questionBankPage = 1;
+        syncQuestionPagination(1, 1);
+        selectedQuestionId = null;
+        questionBankMeta.textContent = "当前筛选下没有可展示的题目。";
+        questionList.innerHTML = '<div class="empty">当前筛选条件下没有匹配题目，试试清空筛选或换个关键词。</div>';
+        renderQuestionDetail(null, visibleItems);
         return;
       }
 
-      const selected = items.find((item) => item.id === selectedQuestionId) || items[0];
+      const pageMeta = getQuestionPageMeta(visibleItems);
+      const pageItems = pageMeta.pageItems;
+      syncQuestionPagination(questionBankPage, pageMeta.totalPages);
+
+      const selected = pageItems.find((item) => item.id === selectedQuestionId) || pageItems[0];
       selectedQuestionId = selected.id;
 
-      items.forEach((item) => {
+      const startNumber = pageMeta.startIndex + 1;
+      const endNumber = Math.min(pageMeta.endIndex, visibleItems.length);
+      questionBankMeta.textContent = `已加载 ${items.length} 道题，当前显示第 ${startNumber}-${endNumber} 题，共 ${visibleItems.length} 道${summarySuffix}。`;
+
+      pageItems.forEach((item, index) => {
         const card = document.createElement("button");
         card.type = "button";
         card.className = `question-item ${item.id === selectedQuestionId ? "active" : ""}`;
-        const tags = (item.tags || []).slice(0, 4).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
+        const tags = (item.tags || []).slice(0, 3).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
+        const sourceText = item.source_title
+          ? `<span class="meta">${escapeHtml(item.source_title)}</span>`
+          : '<span class="meta">未标注来源</span>';
         card.innerHTML = `
+          <span class="question-item-index">${pageMeta.startIndex + index + 1}</span>
           <strong>${escapeHtml(item.title)}</strong>
           <div class="meta">${escapeHtml(item.category)} · ${escapeHtml(item.difficulty)}</div>
-          <p class="meta">${escapeHtml((item.content || "").slice(0, 110))}${item.content && item.content.length > 110 ? "..." : ""}</p>
-          <div class="tag-row">${tags}</div>
+          <p class="meta">${escapeHtml((item.content || "").slice(0, 96))}${item.content && item.content.length > 96 ? "..." : ""}</p>
+          <div class="question-item-footer">
+            <div class="tag-row">${tags || '<span class="meta">暂无标签</span>'}</div>
+            ${sourceText}
+          </div>
         `;
         card.addEventListener("click", () => {
           selectedQuestionId = item.id;
           renderQuestionBank(questionBankItems);
+          if (window.innerWidth <= 840) {
+            questionDetail.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
         });
         questionList.appendChild(card);
       });
 
-      renderQuestionDetail(selected);
+      renderQuestionDetail(selected, visibleItems);
     }
 
     async function requestJSON(url, options = {}) {
@@ -1376,6 +1781,49 @@
         setBusy(false, error.message);
         alert(error.message);
       }
+    }
+
+    questionSearchInput.addEventListener("input", (event) => {
+      questionBankFilters.search = event.target.value.trim();
+      questionBankPage = 1;
+      renderQuestionBank(questionBankItems);
+    });
+
+    questionCategoryFilter.addEventListener("change", (event) => {
+      questionBankFilters.category = event.target.value;
+      questionBankPage = 1;
+      renderQuestionBank(questionBankItems);
+    });
+
+    questionDifficultyFilter.addEventListener("change", (event) => {
+      questionBankFilters.difficulty = event.target.value;
+      questionBankPage = 1;
+      renderQuestionBank(questionBankItems);
+    });
+
+    clearQuestionFiltersBtn.addEventListener("click", () => {
+      questionBankFilters.search = "";
+      questionBankFilters.category = "all";
+      questionBankFilters.difficulty = "all";
+      questionBankPage = 1;
+      questionSearchInput.value = "";
+      questionCategoryFilter.value = "all";
+      questionDifficultyFilter.value = "all";
+      renderQuestionBank(questionBankItems);
+    });
+
+    if (questionPrevPageBtn && questionNextPageBtn) {
+      questionPrevPageBtn.addEventListener("click", () => {
+        questionBankPage = Math.max(1, questionBankPage - 1);
+        renderQuestionBank(questionBankItems);
+        resetQuestionPageView();
+      });
+
+      questionNextPageBtn.addEventListener("click", () => {
+        questionBankPage += 1;
+        renderQuestionBank(questionBankItems);
+        resetQuestionPageView();
+      });
     }
 
     runtimeProvider.addEventListener("change", () => {
